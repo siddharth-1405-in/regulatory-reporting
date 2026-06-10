@@ -33,3 +33,7 @@ app.include_router(report_router)
 @app.get("/")
 def root():
     return {"service": settings.app_name, "docs": "/docs", "api": "/api/health"}
+allow_origins=[
+    "http://localhost:3000",
+    "https://car-web.onrender.com",
+],
