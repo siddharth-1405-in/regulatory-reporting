@@ -1,0 +1,1489 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Revenue Assurance Solution · Agentic AI Tool</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<link rel="stylesheet" href="slides.css">
+<style>
+  /* =========================================================================
+     DECK-LOCAL OVERRIDES & SHARED PATTERNS
+     ========================================================================= */
+  html, body { margin:0; padding:0; background:#1a1024; }
+  deck-stage:not(:defined){ visibility:hidden; }
+
+  /* Compact title block — content slides are dense, so the title rail is
+     pinned tight to the top with a single-line eyebrow + 2-line title max. */
+  .uq-slide.light .title{ top:22px; right:230px; left:42px; }
+  .uq-slide.light .eyebrow{
+    font-family:var(--font-display);font-weight:800;
+    font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--uq-magenta);margin:0 0 4px;
+  }
+  .uq-slide.light .title h2{
+    font-family:var(--font-display);font-weight:800;
+    font-size:24px;color:var(--uq-purple);line-height:1.15;
+    letter-spacing:-0.01em;margin:0;
+  }
+  .uq-slide.light .title .sub{
+    margin:4px 0 0;font-size:13px;color:var(--uq-text-mid);
+    font-weight:500;line-height:1.3;
+  }
+  .uq-slide.light .body{
+    position:absolute;left:42px;right:42px;top:82px;bottom:32px;
+  }
+
+  /* footer page tag — bottom-right brand line */
+  .pg{
+    position:absolute;right:48px;bottom:14px;z-index:3;
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;
+    letter-spacing:.10em;text-transform:uppercase;color:var(--uq-text-muted);
+  }
+  .pg b{ color:var(--uq-purple); }
+
+  /* primitives — reusable across the deck */
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;
+    letter-spacing:.10em;text-transform:uppercase;
+    padding:3px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .chip.mag{ background:var(--uq-magenta);color:#fff; }
+  .chip.pur{ background:var(--uq-purple);color:#fff; }
+  .chip.dpu{ background:var(--uq-dark-purple);color:#fff; }
+  .chip.lav{ background:var(--uq-light-lavender);color:var(--uq-purple); }
+  .chip.blush{ background:var(--uq-blush);color:var(--uq-magenta); }
+  .chip.outline{ background:transparent;color:var(--uq-magenta);box-shadow:inset 0 0 0 1px var(--uq-magenta); }
+
+  .num-dot{
+    width:34px;height:34px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+    font-family:var(--font-display);font-weight:800;font-size:14px;
+  }
+  .num-dot.p{ background:var(--uq-purple); }
+  .num-dot.m{ background:var(--uq-magenta); }
+  .num-dot.sm{ width:24px;height:24px;font-size:11px; }
+  .num-dot.lg{ width:46px;height:46px;font-size:18px; }
+
+  .stripe-l{ position:relative;padding-left:14px; }
+  .stripe-l::before{
+    content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;
+    background:var(--uq-magenta);border-radius:0 2px 2px 0;
+  }
+
+  /* =========================================================================
+     SLIDE 1 — THE SOLUTION
+     ========================================================================= */
+  .s1-three{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:0;
+  }
+  .s1-pillar{
+    background:var(--uq-near-white);border-radius:12px;
+    box-shadow:var(--shadow-card);padding:14px 16px 14px;
+    border-top:4px solid var(--uq-purple);position:relative;
+    display:flex;flex-direction:column;gap:8px;min-height:120px;
+  }
+  .s1-pillar:nth-child(2){ border-top-color:var(--uq-magenta); }
+  .s1-pillar:nth-child(3){ border-top-color:var(--uq-mauve); }
+  .s1-pillar .hd{ display:flex;align-items:center;gap:10px; }
+  .s1-pillar .hd .n{
+    font-family:var(--font-display);font-weight:800;font-size:11px;
+    letter-spacing:.14em;color:var(--uq-magenta);
+  }
+  .s1-pillar:nth-child(2) .hd .n{ color:var(--uq-purple); }
+  .s1-pillar:nth-child(3) .hd .n{ color:var(--uq-mauve); }
+  .s1-pillar h3{
+    margin:0;font-family:var(--font-display);font-weight:800;
+    font-size:15px;color:var(--uq-purple);line-height:1.2;
+  }
+  .s1-pillar p{
+    margin:0;font-size:12px;color:var(--uq-text-dark);line-height:1.4;
+  }
+
+  .s1-aiblock{
+    margin-top:14px;background:var(--uq-light-lavender);
+    border-radius:12px;padding:12px 14px;
+  }
+  .s1-aiblock .ttl{
+    display:flex;align-items:center;gap:10px;margin-bottom:8px;
+  }
+  .s1-aiblock .ttl .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--uq-purple);
+  }
+  .s1-aiblock .ttl .ln{ flex:1;height:1px;background:rgba(73,32,121,.18); }
+  .s1-agents{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;
+  }
+  .s1-agent{
+    background:#fff;border-radius:8px;padding:8px 10px;
+    border:1px solid #D9CEE8;
+  }
+  .s1-agent .nm{
+    font-family:var(--font-display);font-weight:800;font-size:11px;
+    color:var(--uq-purple);line-height:1.1;margin-bottom:2px;
+  }
+  .s1-agent .ds{ font-size:10.5px;color:var(--uq-text-dark);line-height:1.3; }
+
+  .s1-pipe{
+    margin-top:12px;background:var(--uq-dark-purple);color:#fff;
+    border-radius:12px;padding:10px 14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  .s1-pipe .pl{
+    font-family:var(--font-display);font-weight:800;font-size:10.5px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--uq-mauve);
+    flex-shrink:0;
+  }
+  .s1-pipe .flow{
+    flex:1;display:flex;align-items:center;gap:6px;flex-wrap:nowrap;
+  }
+  .s1-pipe .nd{
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+    color:#fff;border-radius:6px;padding:6px 10px;font-size:11px;
+    font-family:var(--font-display);font-weight:700;letter-spacing:.02em;
+    white-space:nowrap;
+  }
+  .s1-pipe .nd.end{ background:var(--uq-magenta);border-color:var(--uq-magenta); }
+  .s1-pipe .ar{ color:var(--uq-mauve);font-weight:800;font-size:14px;flex-shrink:0; }
+
+  /* =========================================================================
+     SLIDE 2 — HOW IT WORKS
+     ========================================================================= */
+  .s2-grid{ display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:10px;height:100%; }
+  .s2-ag{
+    background:var(--uq-near-white);border-radius:10px;
+    box-shadow:var(--shadow-card);padding:11px 12px 10px;
+    display:flex;flex-direction:column;gap:5px;position:relative;
+    border-top:3px solid var(--uq-purple);
+  }
+  .s2-ag.warm{ border-top-color:var(--uq-magenta); }
+  .s2-ag .hd{ display:flex;align-items:center;justify-content:space-between;gap:6px; }
+  .s2-ag .hd .lt{ display:flex;flex-direction:column;gap:1px;min-width:0; }
+  .s2-ag .hd .ag{
+    font-family:var(--font-display);font-weight:800;font-size:9px;
+    letter-spacing:.12em;color:var(--uq-magenta);
+  }
+  .s2-ag .hd .nm{
+    font-family:var(--font-display);font-weight:800;font-size:13.5px;
+    color:var(--uq-purple);line-height:1.1;
+  }
+  .s2-ag .rag{
+    background:var(--uq-dark-purple);color:#fff;
+    font-family:var(--font-display);font-weight:800;font-size:8.5px;
+    letter-spacing:.12em;padding:2px 6px;border-radius:4px;flex-shrink:0;
+  }
+  .s2-ag .ds{
+    font-size:10.5px;color:var(--uq-text-dark);line-height:1.32;margin:0;
+  }
+  .s2-ag .today{
+    margin-top:auto;background:var(--uq-blush);color:var(--uq-purple);
+    border-radius:6px;padding:5px 8px;font-size:9.5px;line-height:1.32;
+    font-style:italic;
+  }
+  .s2-ag .today b{
+    font-family:var(--font-display);font-weight:800;font-style:normal;
+    color:var(--uq-magenta);letter-spacing:.06em;
+  }
+  .s2-ag .ph{
+    position:absolute;top:8px;right:10px;
+    font-family:var(--font-display);font-weight:800;font-size:8.5px;
+    letter-spacing:.10em;color:var(--uq-mauve);
+  }
+
+  /* =========================================================================
+     SLIDE 3 — IMPLEMENTATION PLAN
+     ========================================================================= */
+  .s3-cols{ display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;height:100%; }
+  .s3-ph{
+    background:#fff;border-radius:12px;overflow:hidden;
+    box-shadow:var(--shadow-card);display:flex;flex-direction:column;
+    border:1px solid #E1D9EB;
+  }
+  .s3-ph .hd{
+    background:var(--uq-purple);color:#fff;padding:10px 14px;
+    display:flex;flex-direction:column;gap:1px;
+  }
+  .s3-ph.p2 .hd{ background:var(--uq-magenta); }
+  .s3-ph.p3 .hd{ background:var(--uq-dark-purple); }
+  .s3-ph .hd .pl{
+    font-family:var(--font-display);font-weight:800;font-size:10px;
+    letter-spacing:.14em;color:rgba(255,255,255,.75);
+  }
+  .s3-ph .hd .nm{
+    font-family:var(--font-display);font-weight:800;font-size:18px;
+    line-height:1.1;letter-spacing:-0.01em;
+  }
+  .s3-ph .body{ position:static;padding:11px 14px 12px;display:flex;flex-direction:column;gap:9px;flex:1; }
+  .s3-row{
+    display:flex;align-items:baseline;gap:8px;
+  }
+  .s3-row .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--uq-text-muted);
+    flex-shrink:0;
+  }
+  .s3-row .val{
+    font-family:var(--font-display);font-weight:800;font-size:13.5px;
+    color:var(--uq-purple);
+  }
+  .s3-ph.p2 .s3-row .val{ color:var(--uq-magenta); }
+  .s3-ph.p3 .s3-row .val{ color:var(--uq-dark-purple); }
+  .s3-block{
+    background:var(--uq-light-lavender);border-radius:8px;padding:8px 10px;
+  }
+  .s3-block .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:9px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--uq-magenta);
+    margin-bottom:3px;
+  }
+  .s3-block .v{ font-size:11.5px;color:var(--uq-text-dark);line-height:1.36; }
+  .s3-agents{
+    display:flex;flex-wrap:wrap;gap:4px;
+  }
+  .s3-agents .a{
+    font-family:var(--font-display);font-weight:700;font-size:9.5px;
+    background:#fff;border:1px solid var(--uq-light-lavender);
+    border-radius:999px;padding:3px 8px;color:var(--uq-purple);
+  }
+  .s3-need{ list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px; }
+  .s3-need li{
+    font-size:11.5px;color:var(--uq-text-dark);line-height:1.35;
+    padding-left:12px;position:relative;
+  }
+  .s3-need li::before{
+    content:"›";position:absolute;left:0;top:0;color:var(--uq-magenta);
+    font-family:var(--font-display);font-weight:800;
+  }
+  .s3-out{
+    margin-top:auto;background:var(--uq-blush);border-radius:8px;
+    padding:8px 10px;font-size:11.5px;color:var(--uq-text-dark);line-height:1.35;
+  }
+  .s3-out .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:9px;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--uq-magenta);
+    margin-bottom:3px;
+  }
+
+  /* =========================================================================
+     SLIDE 4 — INTERNAL AUDIT FLOW
+     ========================================================================= */
+  .s4-roles{ display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px; }
+  .s4-role{
+    background:var(--uq-near-white);border-radius:10px;padding:10px 12px;
+    border-left:3px solid var(--uq-purple);box-shadow:var(--shadow-card);
+  }
+  .s4-role:nth-child(2){ border-left-color:var(--uq-magenta); }
+  .s4-role:nth-child(3){ border-left-color:var(--uq-mauve); }
+  .s4-role:nth-child(4){ border-left-color:var(--uq-lavender); }
+  .s4-role .rl{
+    font-family:var(--font-display);font-weight:800;font-size:12.5px;
+    color:var(--uq-purple);margin-bottom:3px;line-height:1.1;
+  }
+  .s4-role .dx{ font-size:10.5px;color:var(--uq-text-dark);line-height:1.35; }
+
+  .s4-week-hd{
+    display:flex;align-items:center;gap:12px;margin-bottom:8px;
+  }
+  .s4-week-hd .ttl{
+    font-family:var(--font-display);font-weight:800;font-size:13px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--uq-purple);
+  }
+  .s4-week-hd .ln{ flex:1;height:1px;background:var(--uq-light-lavender); }
+
+  .s4-timeline{
+    display:grid;grid-template-columns:repeat(8,1fr);gap:6px;position:relative;
+  }
+  .s4-step{
+    background:#fff;border-radius:8px;border:1px solid var(--uq-light-lavender);
+    padding:8px 8px;display:flex;flex-direction:column;gap:3px;position:relative;
+  }
+  .s4-step .when{
+    font-family:var(--font-display);font-weight:800;font-size:9px;
+    letter-spacing:.10em;color:#fff;background:var(--uq-purple);
+    padding:2px 6px;border-radius:4px;align-self:flex-start;
+  }
+  .s4-step.m .when{ background:var(--uq-magenta); }
+  .s4-step.d .when{ background:var(--uq-dark-purple); }
+  .s4-step .who{
+    font-family:var(--font-display);font-weight:800;font-size:10px;
+    color:var(--uq-purple);line-height:1.15;margin-top:2px;
+  }
+  .s4-step .ds{ font-size:9.5px;color:var(--uq-text-dark);line-height:1.32; }
+
+  .s4-foot{
+    position:absolute;left:42px;right:42px;bottom:36px;
+    background:var(--uq-dark-purple);color:#fff;border-radius:10px;
+    padding:10px 16px;display:flex;align-items:center;gap:14px;
+    font-size:12px;line-height:1.4;
+  }
+  .s4-foot b{ color:#fff;font-family:var(--font-display);font-weight:800; }
+  .s4-foot .ic{ color:var(--uq-mauve);font-size:14px;font-weight:800; }
+  .s4-foot .hil{ color:var(--uq-mauve);font-style:italic; }
+  .s4-foot .tag{
+    margin-left:auto;font-family:var(--font-display);font-weight:800;
+    font-size:9.5px;letter-spacing:.12em;color:var(--uq-mauve);
+    border-left:1px solid rgba(255,255,255,.18);padding-left:14px;
+  }
+
+  /* =========================================================================
+     SLIDE 5 — SOLUTION ARCHITECTURE
+     ========================================================================= */
+  .s5-stack{ display:flex;flex-direction:column;gap:5px;height:100%; }
+  .s5-layer{
+    border-radius:8px;padding:7px 11px;display:grid;
+    grid-template-columns:148px 1fr;gap:10px;align-items:center;
+    border:1px solid var(--uq-light-lavender);background:#fff;
+  }
+  .s5-layer.gov{ background:var(--uq-magenta);color:#fff;border-color:var(--uq-magenta); }
+  .s5-layer.runtime{ background:var(--uq-light-lavender);border-color:#D5C7E5; }
+  .s5-layer.knowledge{ background:var(--uq-blush);border-color:#E8C6D8; }
+  .s5-layer.data{ background:var(--uq-dark-purple);color:#fff;border-color:var(--uq-dark-purple); }
+  .s5-layer.obs{ background:var(--uq-near-white); }
+  .s5-layer .lhd{
+    display:flex;flex-direction:column;gap:1px;border-right:1px solid rgba(73,32,121,.14);
+    padding-right:10px;
+  }
+  .s5-layer.gov .lhd, .s5-layer.data .lhd{ border-right-color:rgba(255,255,255,.20); }
+  .s5-layer .lhd .nm{
+    font-family:var(--font-display);font-weight:800;font-size:11.5px;
+    line-height:1.1;color:var(--uq-purple);letter-spacing:.02em;
+  }
+  .s5-layer.gov .lhd .nm, .s5-layer.data .lhd .nm{ color:#fff; }
+  .s5-layer .lhd .sub{
+    font-size:9px;line-height:1.25;color:var(--uq-text-mid);
+  }
+  .s5-layer.gov .lhd .sub, .s5-layer.data .lhd .sub{ color:rgba(255,255,255,.78); }
+
+  .s5-cells{ display:flex;gap:6px;align-items:stretch;flex-wrap:nowrap; }
+  .s5-cell{
+    background:#fff;border-radius:6px;padding:5px 8px;
+    flex:1;min-width:0;border:1px solid var(--uq-light-lavender);
+  }
+  .s5-layer.runtime .s5-cell{ background:#fff; }
+  .s5-layer.knowledge .s5-cell{ background:#fff;border-color:#E8C6D8; }
+  .s5-layer.gov .s5-cell, .s5-layer.data .s5-cell{
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);
+  }
+  .s5-cell .ch{
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;
+    color:var(--uq-purple);line-height:1.15;letter-spacing:.01em;
+  }
+  .s5-layer.gov .s5-cell .ch, .s5-layer.data .s5-cell .ch{ color:#fff; }
+  .s5-cell .cs{
+    font-size:8.5px;line-height:1.25;color:var(--uq-text-mid);margin-top:1px;
+  }
+  .s5-layer.gov .s5-cell .cs, .s5-layer.data .s5-cell .cs{ color:rgba(255,255,255,.78); }
+
+  /* orchestrator + intent router need special framing */
+  .s5-runtime-top{
+    display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:5px;
+  }
+  .s5-runtime-top .c{
+    background:var(--uq-purple);color:#fff;border-radius:6px;padding:5px 9px;
+    display:flex;flex-direction:column;gap:1px;
+  }
+  .s5-runtime-top .c .ch{ font-family:var(--font-display);font-weight:800;font-size:9.5px;letter-spacing:.10em;color:#fff; }
+  .s5-runtime-top .c .cs{ font-size:8.5px;color:rgba(255,255,255,.82);line-height:1.25; }
+
+  .s5-runtime-bot{ display:grid;grid-template-columns:repeat(8,1fr);gap:5px; }
+
+  .s5-tools{
+    display:flex;flex-wrap:wrap;gap:4px;padding-top:2px;
+  }
+  .s5-tools .tl{
+    font-family:var(--font-mono);font-size:9.5px;color:var(--uq-purple);
+    background:#fff;padding:3px 7px;border-radius:4px;
+    border:1px solid var(--uq-light-lavender);letter-spacing:.01em;
+  }
+
+  .s5-models{ display:flex;gap:6px;align-items:center;flex-wrap:wrap; }
+  .s5-models .ml{
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;color:var(--uq-purple);
+    background:#fff;border:1px solid var(--uq-light-lavender);
+    padding:3px 8px;border-radius:6px;
+  }
+  .s5-models .dt{ color:var(--uq-mauve);font-weight:800; }
+
+  .s5-foot{
+    position:absolute;left:42px;right:42px;bottom:14px;
+    font-size:10px;color:var(--uq-text-mid);line-height:1.35;font-style:italic;
+  }
+  .s5-foot b{ color:var(--uq-purple);font-family:var(--font-display);font-weight:800;font-style:normal; }
+
+  /* =========================================================================
+     SLIDE 6 — LICENSING COST
+     ========================================================================= */
+  .s6-summary{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:11px;
+  }
+  .s6-card{
+    background:var(--uq-near-white);border-radius:10px;
+    box-shadow:var(--shadow-card);padding:10px 13px;
+    border-top:4px solid var(--uq-purple);position:relative;
+  }
+  .s6-card.p2{ border-top-color:var(--uq-magenta); }
+  .s6-card.p3{ border-top-color:var(--uq-dark-purple); }
+  .s6-card .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;
+    letter-spacing:.14em;color:var(--uq-text-muted);
+  }
+  .s6-card .val{
+    font-family:var(--font-display);font-weight:800;font-size:30px;
+    color:var(--uq-purple);line-height:1.0;margin:3px 0 3px;
+    letter-spacing:-0.02em;
+  }
+  .s6-card.p2 .val{ color:var(--uq-magenta); }
+  .s6-card.p3 .val{ color:var(--uq-dark-purple); }
+  .s6-card .ds{
+    font-size:10.5px;color:var(--uq-text-mid);line-height:1.35;
+  }
+  .s6-card .ds b{ color:var(--uq-text-dark);font-family:var(--font-display);font-weight:800; }
+
+  .s6-tbl{
+    width:100%;border-collapse:collapse;font-size:10.5px;
+    background:#fff;border-radius:8px;overflow:hidden;
+    box-shadow:var(--shadow-card);
+  }
+  .s6-tbl th{
+    background:var(--uq-dark-purple);color:#fff;text-align:left;
+    font-family:var(--font-display);font-weight:800;font-size:10px;
+    letter-spacing:.10em;text-transform:uppercase;padding:7px 10px;
+  }
+  .s6-tbl th:not(:first-child){ text-align:center; }
+  .s6-tbl td{
+    padding:6px 10px;border-top:1px solid var(--uq-light-lavender);
+    line-height:1.3;color:var(--uq-text-dark);
+  }
+  .s6-tbl tr:nth-child(even) td{ background:var(--uq-alt-light); }
+  .s6-tbl td:first-child{
+    font-family:var(--font-display);font-weight:800;color:var(--uq-purple);font-size:10.5px;
+  }
+  .s6-tbl td:not(:first-child){ text-align:center; }
+  .s6-tbl td b{ color:var(--uq-magenta);font-family:var(--font-display);font-weight:800; }
+
+  .s6-foot{
+    position:absolute;left:42px;right:42px;bottom:32px;
+    background:var(--uq-blush);border-radius:8px;padding:8px 14px;
+    font-size:10.5px;color:var(--uq-text-dark);line-height:1.4;font-style:italic;
+  }
+  .s6-foot b{ color:var(--uq-purple);font-family:var(--font-display);font-weight:800;font-style:normal; }
+
+  /* =========================================================================
+     SLIDE 7 — USER JOURNEY (timeline)
+     ========================================================================= */
+  .s7-case{
+    background:var(--uq-dark-purple);color:#fff;border-radius:10px;
+    padding:10px 14px;margin-bottom:12px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .s7-case .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:10px;
+    letter-spacing:.14em;color:var(--uq-mauve);flex-shrink:0;
+  }
+  .s7-case .msg{ font-size:12.5px;line-height:1.4;color:#fff; }
+  .s7-case .msg b{ color:var(--uq-mauve);font-family:var(--font-display);font-weight:800; }
+
+  .s7-timeline{ display:grid;grid-template-columns:repeat(6,1fr);gap:9px;position:relative; }
+  .s7-step{
+    background:#fff;border-radius:10px;border:1px solid var(--uq-light-lavender);
+    padding:10px 11px 9px;display:flex;flex-direction:column;gap:6px;
+    box-shadow:var(--shadow-card);
+  }
+  .s7-step .top{
+    display:flex;align-items:center;gap:8px;
+  }
+  .s7-step .top .n{
+    font-family:var(--font-display);font-weight:800;font-size:11px;
+    width:24px;height:24px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--uq-purple);color:#fff;flex-shrink:0;
+  }
+  .s7-step:nth-child(even) .top .n{ background:var(--uq-magenta); }
+  .s7-step .top .when{
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;
+    letter-spacing:.10em;color:var(--uq-magenta);
+  }
+  .s7-step:nth-child(even) .top .when{ color:var(--uq-purple); }
+  .s7-step .act{
+    font-family:var(--font-display);font-weight:800;font-size:13px;
+    color:var(--uq-purple);line-height:1.1;
+  }
+  .s7-step .agent{
+    font-family:var(--font-display);font-weight:700;font-size:9.5px;
+    letter-spacing:.06em;color:var(--uq-text-muted);
+  }
+  .s7-step .sec{
+    background:var(--uq-light-lavender);border-radius:6px;padding:6px 8px;
+    font-size:10px;color:var(--uq-text-dark);line-height:1.35;
+  }
+  .s7-step .sec.warm{ background:var(--uq-blush); }
+  .s7-step .sec .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:8.5px;
+    letter-spacing:.10em;color:var(--uq-magenta);margin-bottom:1px;
+  }
+  .s7-step .time{
+    margin-top:auto;align-self:flex-start;
+    font-family:var(--font-display);font-weight:800;font-size:10px;
+    background:var(--uq-dark-purple);color:#fff;padding:2px 8px;border-radius:999px;
+    letter-spacing:.04em;
+  }
+
+  /* =========================================================================
+     SLIDE 8 — THE BUILD PLAN
+     ========================================================================= */
+  .s8-rows{ display:flex;flex-direction:column;gap:7px; }
+  .s8-row{
+    background:#fff;border:1px solid var(--uq-light-lavender);border-radius:9px;
+    display:grid;grid-template-columns:118px 1fr 160px;gap:0;align-items:stretch;
+    box-shadow:var(--shadow-card);overflow:hidden;
+  }
+  .s8-row .wk{
+    background:var(--uq-purple);color:#fff;padding:8px 12px;
+    display:flex;flex-direction:column;justify-content:center;gap:2px;
+  }
+  .s8-row.w2 .wk{ background:var(--uq-magenta); }
+  .s8-row.w3a .wk{ background:var(--uq-dark-purple); }
+  .s8-row.w3b .wk{ background:var(--uq-mauve); }
+  .s8-row .wk .w{
+    font-family:var(--font-display);font-weight:800;font-size:10px;
+    letter-spacing:.14em;color:rgba(255,255,255,.78);
+  }
+  .s8-row .wk .nm{
+    font-family:var(--font-display);font-weight:800;font-size:13px;line-height:1.1;
+  }
+  .s8-row .bd{ padding:8px 12px;display:flex;flex-direction:column;gap:3px;justify-content:center; }
+  .s8-row .bd .it{
+    font-size:10.5px;color:var(--uq-text-dark);line-height:1.36;
+    padding-left:12px;position:relative;
+  }
+  .s8-row .bd .it::before{
+    content:"›";position:absolute;left:0;top:0;color:var(--uq-magenta);
+    font-family:var(--font-display);font-weight:800;
+  }
+  .s8-row .tag{
+    background:var(--uq-light-lavender);
+    display:flex;align-items:center;justify-content:center;gap:4px;
+    padding:6px 10px;flex-direction:column;
+  }
+  .s8-row .tag .lbl{
+    font-family:var(--font-display);font-weight:800;font-size:9px;
+    letter-spacing:.14em;color:var(--uq-text-muted);
+  }
+  .s8-row .tag .val{
+    font-family:var(--font-display);font-weight:800;font-size:11px;
+    color:var(--uq-purple);text-align:center;line-height:1.15;
+  }
+  .s8-foot{
+    position:absolute;left:42px;right:42px;bottom:14px;
+    display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;
+    background:var(--uq-dark-purple);color:#fff;border-radius:8px;padding:8px 14px;
+  }
+  .s8-foot .msg{ font-size:11px;line-height:1.4;color:rgba(255,255,255,.92); }
+  .s8-foot .msg b{ color:var(--uq-mauve);font-family:var(--font-display);font-weight:800; }
+  .s8-foot .src{
+    font-family:var(--font-display);font-weight:800;font-size:9.5px;
+    letter-spacing:.10em;color:var(--uq-mauve);
+    border-left:1px solid rgba(255,255,255,.18);padding-left:12px;white-space:nowrap;
+  }
+
+  /* =========================================================================
+     SLIDE 9 — TECHNICAL ARCHITECTURE TABLE
+     ========================================================================= */
+  .s9-tbl{
+    width:100%;border-collapse:collapse;font-size:11px;
+    background:#fff;border-radius:10px;overflow:hidden;
+    box-shadow:var(--shadow-card);
+  }
+  .s9-tbl th{
+    background:var(--uq-dark-purple);color:#fff;text-align:left;
+    font-family:var(--font-display);font-weight:800;font-size:10.5px;
+    letter-spacing:.10em;text-transform:uppercase;padding:9px 12px;
+  }
+  .s9-tbl td{
+    padding:9px 12px;border-top:1px solid var(--uq-light-lavender);
+    vertical-align:top;line-height:1.4;color:var(--uq-text-dark);
+  }
+  .s9-tbl tr:nth-child(even) td{ background:var(--uq-alt-light); }
+  .s9-tbl td:first-child{
+    font-family:var(--font-display);font-weight:800;color:var(--uq-purple);
+    font-size:12px;width:140px;letter-spacing:.02em;
+  }
+  .s9-tbl td:nth-child(2){ width:230px;color:var(--uq-text-mid); }
+  .s9-tbl td:nth-child(3) b, .s9-tbl td:nth-child(4) b{
+    font-family:var(--font-display);font-weight:800;color:var(--uq-purple);
+  }
+  .s9-tbl td:nth-child(4) b{ color:var(--uq-magenta); }
+
+  .s9-tags{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;
+  }
+  .s9-tag{
+    background:var(--uq-light-lavender);border-radius:9px;padding:9px 12px;
+  }
+  .s9-tag .ttl{
+    font-family:var(--font-display);font-weight:800;font-size:11.5px;
+    color:var(--uq-purple);margin-bottom:2px;
+  }
+  .s9-tag .ds{ font-size:10.5px;color:var(--uq-text-dark);line-height:1.35; }
+
+</style>
+</head>
+<body>
+
+<deck-stage width="1280" height="720">
+
+  <!-- ========================================================================
+       SLIDE 1 · THE SOLUTION
+       ======================================================================== -->
+  <section data-screen-label="01 The Solution">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">1 · The Solution</p>
+        <h2>Agentic AI for Revenue Assurance</h2>
+      </div>
+
+      <div class="body">
+
+        <!-- Three pillars -->
+        <div class="s1-three">
+          <div class="s1-pillar">
+            <div class="hd"><div class="num-dot p">01</div><span class="n">Step One</span></div>
+            <h3>Compute what should have been charged</h3>
+            <p>Apply the rule — formula, rate, conditions — to every transaction across lending, cards, trade finance, treasury, transaction banking.</p>
+          </div>
+          <div class="s1-pillar">
+            <div class="hd"><div class="num-dot m">02</div><span class="n">Step Two</span></div>
+            <h3>Compare to what actually was charged</h3>
+            <p>Read GL and source systems. Every gap is an exception, with full lineage.</p>
+          </div>
+          <div class="s1-pillar">
+            <div class="hd"><div class="num-dot p">03</div><span class="n">Step Three</span></div>
+            <h3>Route, resolve, recover</h3>
+            <p>Each exception goes to the process owner with a plain-English narrative. Tracked end-to-end to the audit head.</p>
+          </div>
+        </div>
+
+        <!-- Agentic AI Inside -->
+        <div class="s1-aiblock">
+          <div class="ttl">
+            <span class="chip mag">Agentic AI Inside</span>
+            <span class="ln"></span>
+          </div>
+          <div class="s1-agents">
+            <div class="s1-agent"><div class="nm">Rule Author</div><div class="ds">Suggests rule logic when new products appear in data</div></div>
+            <div class="s1-agent"><div class="nm">Clustering</div><div class="ds">Groups hundreds of exceptions into root-cause clusters</div></div>
+            <div class="s1-agent"><div class="nm">Scoring &amp; Narrative</div><div class="ds">Ranks by materiality, drafts plain-English explanation</div></div>
+            <div class="s1-agent"><div class="nm">Remediation</div><div class="ds">Drafts owner emails, tracks SLA, escalates the stale ones</div></div>
+            <div class="s1-agent"><div class="nm">Precedent</div><div class="ds">Surfaces prior rulings on similar exceptions for consistency</div></div>
+            <div class="s1-agent"><div class="nm">Month-End Narrative</div><div class="ds">Drafts the executive RA report with citations, monthly</div></div>
+            <div class="s1-agent"><div class="nm">Live AI Insights</div><div class="ds">Replaces hardcoded dashboard cards with real-time analysis</div></div>
+            <div class="s1-agent"><div class="nm">Dashboard Chat</div><div class="ds">Conversational access to leakage, exceptions, rule status</div></div>
+          </div>
+        </div>
+
+        <!-- Data Pipeline strip -->
+        <div class="s1-pipe">
+          <div class="pl">Data Pipeline</div>
+          <div class="flow">
+            <div class="nd">Data Sources</div><div class="ar">→</div>
+            <div class="nd">Extract</div><div class="ar">→</div>
+            <div class="nd">Transform</div><div class="ar">→</div>
+            <div class="nd">Rule Engine</div><div class="ar">→</div>
+            <div class="nd">Exception Management</div><div class="ar">→</div>
+            <div class="nd end">Dashboards</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>1 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 2 · HOW IT WORKS — 8 specialised agents
+       ======================================================================== -->
+  <section data-screen-label="02 How It Works">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">2 · How It Works</p>
+        <h2>Eight specialised agents for a continuous, agentic assurance layer</h2>
+      </div>
+
+      <div class="body" style="top:78px;bottom:30px;">
+        <div class="s2-grid">
+
+          <div class="s2-ag">
+            <div class="ph">Phase 1</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 01</span><span class="nm">Live AI Insights</span></div></div>
+            <p class="ds">Real-time analysis cards on the dashboard: "Cards exceptions up 40% — driven by new annual fee not yet repriced."</p>
+            <div class="today"><b>Replaces</b> hardcoded static dashboard strings with continuously updated, contextual analysis.</div>
+          </div>
+
+          <div class="s2-ag">
+            <div class="ph">Phase 1</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 02</span><span class="nm">Exception Clustering</span></div></div>
+            <p class="ds">Groups hundreds of raw exceptions into a handful of root-cause clusters by pattern, product, and timing.</p>
+            <div class="today"><b>Today:</b> auditors spend 2 days sorting before any real investigation begins.</div>
+          </div>
+
+          <div class="s2-ag">
+            <div class="ph">Phase 1</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 03</span><span class="nm">Scoring &amp; Narrative</span></div></div>
+            <p class="ds">Ranks clusters by financial materiality. Drafts the plain-English explanation for each in the auditor's voice.</p>
+            <div class="today"><b>Today:</b> manual writing-up of findings consumes more time than the investigation itself.</div>
+          </div>
+
+          <div class="s2-ag">
+            <div class="ph">Phase 1</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 04</span><span class="nm">Dashboard Chat</span></div></div>
+            <p class="ds">"Show me all Trade Finance exceptions over ₹50L in March." "Why is the Cards backlog growing?" Natural-language access.</p>
+            <div class="today"><b>Removes</b> the dashboard navigation barrier. Auditors get answers in seconds, not clicks.</div>
+          </div>
+
+          <div class="s2-ag warm">
+            <div class="ph">Phase 2</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 05</span><span class="nm">Precedent Surfacing</span></div><span class="rag">RAG</span></div>
+            <p class="ds">Retrieves prior rulings on similar exceptions. "This waiver was disputed in Q2 — here's how it was resolved."</p>
+            <div class="today"><b>Inconsistent</b> rulings on similar cases create regulatory audit risk. This makes decisions auditable.</div>
+          </div>
+
+          <div class="s2-ag warm">
+            <div class="ph">Phase 2</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 06</span><span class="nm">Month-End Narrative</span></div><span class="rag">RAG</span></div>
+            <p class="ds">Auto-generates the monthly executive RA report with citations to the underlying exceptions and resolutions.</p>
+            <div class="today"><b>Today:</b> 1–2 days of senior auditor time monthly. Becomes a review-and-approve workflow.</div>
+          </div>
+
+          <div class="s2-ag warm">
+            <div class="ph">Phase 2</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 07</span><span class="nm">Remediation</span></div></div>
+            <p class="ds">Drafts the charge type / process owner email in the bank's template. Tracks SLA. Follows up. Escalates the stale ones to managers.</p>
+            <div class="today"><b>Today:</b> manual chasing in spreadsheets — exceptions sit open for weeks without follow-up.</div>
+          </div>
+
+          <div class="s2-ag warm">
+            <div class="ph">Phase 3</div>
+            <div class="hd"><div class="lt"><span class="ag">Agent 08</span><span class="nm">Rule Author</span></div><span class="rag">RAG</span></div>
+            <p class="ds">Detects new product codes in transactions with no matching rule. Reads the product circular, suggests rule logic for review.</p>
+            <div class="today"><b>Removes</b> the dashboard navigation barrier. Auditors get answers in seconds, not clicks.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>2 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 3 · IMPLEMENTATION PLAN
+       ======================================================================== -->
+  <section data-screen-label="03 Implementation Plan">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">3 · Implementation Plan</p>
+        <h2>Three phases · what we do, what we need, what we get</h2>
+      </div>
+
+      <div class="body" style="top:78px;bottom:24px;">
+        <div class="s3-cols">
+
+          <!-- PHASE 1 -->
+          <div class="s3-ph">
+            <div class="hd">
+              <span class="pl">Phase 1  ·  2–3 weeks</span>
+              <span class="nm">Foundation &amp; Detection</span>
+            </div>
+            <div class="body" style="position:static;padding:11px 14px 12px;display:flex;flex-direction:column;gap:9px;flex:1;">
+              <div class="s3-row"><span class="lbl">Charge types</span><span class="val">5–10</span></div>
+              <div class="s3-row"><span class="lbl">Agents · 4</span></div>
+              <div class="s3-agents">
+                <span class="a">Clustering</span>
+                <span class="a">Scoring &amp; Narrative</span>
+                <span class="a">Live AI Insights</span>
+                <span class="a">Dashboard Chat</span>
+              </div>
+              <div class="s3-block">
+                <div class="lbl">What we do</div>
+                <div class="v">Stand up the rule engine, exception store and dashboard. Ship the first 4 agents.</div>
+              </div>
+              <div>
+                <div class="lbl" style="font-family:var(--font-display);font-weight:800;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--uq-magenta);margin-bottom:4px;">What we need</div>
+                <ul class="s3-need">
+                  <li>KPMG charge-type list + 5–10 SQL scripts</li>
+                  <li>Sandbox access to source tables (read-only)</li>
+                </ul>
+              </div>
+              <div class="s3-out">
+                <div class="lbl">Outcome</div>
+                Working tool. First exceptions surfaced and visible to the IA team.
+              </div>
+            </div>
+          </div>
+
+          <!-- PHASE 2 -->
+          <div class="s3-ph p2">
+            <div class="hd">
+              <span class="pl">Phase 2  ·  2–3 weeks</span>
+              <span class="nm">Workflow &amp; Consistency</span>
+            </div>
+            <div class="body" style="position:static;padding:11px 14px 12px;display:flex;flex-direction:column;gap:9px;flex:1;">
+              <div class="s3-row"><span class="lbl">Charge types</span><span class="val">60+</span></div>
+              <div class="s3-row"><span class="lbl">Agents · 3</span></div>
+              <div class="s3-agents">
+                <span class="a">Remediation</span>
+                <span class="a">Precedent</span>
+                <span class="a">Month-End Narrative</span>
+              </div>
+              <div class="s3-block">
+                <div class="lbl">What we do</div>
+                <div class="v">Close the loop with process owners. Add consistency and reporting agents.</div>
+              </div>
+              <div>
+                <div class="lbl" style="font-family:var(--font-display);font-weight:800;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--uq-magenta);margin-bottom:4px;">What we need</div>
+                <ul class="s3-need">
+                  <li>Fee circulars · RBI guidance</li>
+                  <li>12+ months of prior audit decisions and rulings</li>
+                  <li>Bank's owner-email and report templates</li>
+                </ul>
+              </div>
+              <div class="s3-out">
+                <div class="lbl">Outcome</div>
+                First recoveries hit the GL. IA team operating in steady state.
+              </div>
+            </div>
+          </div>
+
+          <!-- PHASE 3 -->
+          <div class="s3-ph p3">
+            <div class="hd">
+              <span class="pl">Phase 3  ·  2 weeks</span>
+              <span class="nm">Coverage &amp; Autonomy</span>
+            </div>
+            <div class="body" style="position:static;padding:11px 14px 12px;display:flex;flex-direction:column;gap:9px;flex:1;">
+              <div class="s3-row"><span class="lbl">Charge types</span><span class="val">125+</span></div>
+              <div class="s3-row"><span class="lbl">Agents · 1</span></div>
+              <div class="s3-agents">
+                <span class="a">Rule Author</span>
+              </div>
+              <div class="s3-block">
+                <div class="lbl">What we do</div>
+                <div class="v">Reach full coverage. Add new-product detection. Package for on-prem deployment.</div>
+              </div>
+              <div>
+                <div class="lbl" style="font-family:var(--font-display);font-weight:800;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--uq-magenta);margin-bottom:4px;">What we need</div>
+                <ul class="s3-need">
+                  <li>Complete product master + all fee/rate circulars</li>
+                  <li>Product-launch SOP documents</li>
+                  <li>Model-risk policy alignment + IT-security review</li>
+                </ul>
+              </div>
+              <div class="s3-out">
+                <div class="lbl">Outcome</div>
+                Production-grade. Ready for sale to banks directly.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>3 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 4 · INTERNAL AUDIT FLOW
+       ======================================================================== -->
+  <section data-screen-label="04 Internal Audit Flow">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">4 · Internal Audit Flow</p>
+        <h2>Agents do the prep. The audit team approves, acts, signs off.</h2>
+      </div>
+
+      <div class="body" style="top:78px;bottom:24px;">
+
+        <div class="s4-roles">
+          <div class="s4-role">
+            <div class="rl">CAE / IA Head</div>
+            <div class="dx">Sees coverage, leakage detected, recovery trend; uses chat and live insights</div>
+          </div>
+          <div class="s4-role">
+            <div class="rl">Audit Manager</div>
+            <div class="dx">Approves rules and clusters; signs off exception closures; reviews monthly narrative</div>
+          </div>
+          <div class="s4-role">
+            <div class="rl">Audit Analyst</div>
+            <div class="dx">Reviews triaged clusters and precedents; approves owner mails the agent drafted</div>
+          </div>
+          <div class="s4-role">
+            <div class="rl">Process Owner</div>
+            <div class="dx">Receives the agent-drafted mail; confirms or disputes the exception</div>
+          </div>
+        </div>
+
+        <div class="s4-week-hd">
+          <span class="ttl">A Week in the Life — New Credit Card Variant Launches</span>
+          <span class="ln"></span>
+          <span class="chip outline">Human in the Loop</span>
+        </div>
+
+        <div class="s4-timeline">
+          <div class="s4-step">
+            <span class="when">Day 0</span>
+            <div class="who">Rule Author agent</div>
+            <div class="ds">Detects new product code with no matching rule. Suggests rule logic. Pings the team.</div>
+          </div>
+          <div class="s4-step m">
+            <span class="when">Day 1</span>
+            <div class="who">Audit analyst</div>
+            <div class="ds">Reviews suggested rule. Edits one condition. Approves to UAT.</div>
+          </div>
+          <div class="s4-step">
+            <span class="when">Day 2</span>
+            <div class="who">Audit manager</div>
+            <div class="ds">Reviews UAT results. Approves to production. Two-person sign-off.</div>
+          </div>
+          <div class="s4-step m">
+            <span class="when">Week 2</span>
+            <div class="who">Clustering agent</div>
+            <div class="ds">Rule fires 400 exceptions. Clusters: 380 are annual fee still at old rate.</div>
+          </div>
+          <div class="s4-step m">
+            <span class="when">Week 2</span>
+            <div class="who">Scoring + Narrative</div>
+            <div class="ds">Ranks cluster #1 as ₹2.4 Cr material. Drafts narrative for review.</div>
+          </div>
+          <div class="s4-step m">
+            <span class="when">Week 2</span>
+            <div class="who">Precedent agent</div>
+            <div class="ds">Surfaces 2 prior similar disputes from Q3. Analyst aligns the approach.</div>
+          </div>
+          <div class="s4-step m">
+            <span class="when">Week 2</span>
+            <div class="who">Remediation agent</div>
+            <div class="ds">Drafts owner mail. Analyst approves and sends. Agent tracks SLA.</div>
+          </div>
+          <div class="s4-step d">
+            <span class="when">Month-end</span>
+            <div class="who">Narrative agent</div>
+            <div class="ds">Cites this case in the executive monthly RA report for the CAE.</div>
+          </div>
+        </div>
+
+        <div class="s4-foot">
+          <span class="ic">⏱</span>
+          <div>Total human effort: <b>~5 hours over 4 weeks</b>.&nbsp;&nbsp;<span class="hil">Without the tool: a 6-month investigation and partial recovery.</span></div>
+        </div>
+
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>4 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 5 · SOLUTION ARCHITECTURE
+       ======================================================================== -->
+  <section data-screen-label="05 Solution Architecture">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">Solution Architecture</p>
+        <h2>End-to-end agentic platform for Revenue Assurance</h2>
+      </div>
+
+      <div class="body" style="top:74px;bottom:32px;">
+        <div class="s5-stack">
+
+          <!-- GOVERNANCE -->
+          <div class="s5-layer gov">
+            <div class="lhd">
+              <span class="nm">Responsible AI &amp; Governance</span>
+              <span class="sub">enforced across every layer</span>
+            </div>
+            <div class="s5-cells">
+              <div class="s5-cell"><div class="ch">Guardrails</div></div>
+              <div class="s5-cell"><div class="ch">Audit Log</div></div>
+              <div class="s5-cell"><div class="ch">Access Control</div><div class="cs">RBAC + Two-Person</div></div>
+              <div class="s5-cell"><div class="ch">Content Safety</div></div>
+              <div class="s5-cell"><div class="ch">Model-Risk Documentation</div></div>
+            </div>
+          </div>
+
+          <!-- USER EXPERIENCE -->
+          <div class="s5-layer">
+            <div class="lhd">
+              <span class="nm">User Experience Layer</span>
+              <span class="sub">SSO via Okta / Azure AD</span>
+            </div>
+            <div class="s5-cells">
+              <div class="s5-cell"><div class="ch">Dashboard</div><div class="cs">KPIs · trends · live insights</div></div>
+              <div class="s5-cell"><div class="ch">Exception Inbox</div><div class="cs">Triaged clusters · approvals</div></div>
+              <div class="s5-cell"><div class="ch">Chat Interface</div><div class="cs">Natural-language access</div></div>
+              <div class="s5-cell"><div class="ch">Admin &amp; Sign-off</div><div class="cs">Two-person controls</div></div>
+            </div>
+          </div>
+
+          <!-- AGENT RUNTIME -->
+          <div class="s5-layer runtime">
+            <div class="lhd">
+              <span class="nm">Agent Runtime</span>
+              <span class="sub">Orchestrator + Intent Router + 8 specialist agents</span>
+            </div>
+            <div>
+              <div class="s5-runtime-top">
+                <div class="c"><span class="ch">Orchestrator</span><span class="cs">Routes work · enforces approval gates · manages agent handoffs</span></div>
+                <div class="c"><span class="ch">Intent Router</span><span class="cs">Classifies user request · prompt-safety guardrails · picks the right agent</span></div>
+              </div>
+              <div class="s5-runtime-bot">
+                <div class="s5-cell"><div class="ch">Rule Author</div><div class="cs">New product codes</div></div>
+                <div class="s5-cell"><div class="ch">Clustering</div><div class="cs">By root cause</div></div>
+                <div class="s5-cell"><div class="ch">Scoring &amp; Narrative</div><div class="cs">Ranks materiality</div></div>
+                <div class="s5-cell"><div class="ch">Remediation</div><div class="cs">Owner emails · SLA</div></div>
+                <div class="s5-cell"><div class="ch">Precedent</div><div class="cs">Prior similar rulings</div></div>
+                <div class="s5-cell"><div class="ch">Month-End Narrative</div><div class="cs">RA report</div></div>
+                <div class="s5-cell"><div class="ch">Live AI Insights</div><div class="cs">Dashboard cards</div></div>
+                <div class="s5-cell"><div class="ch">Dashboard Chat</div><div class="cs">Conversational</div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MCP TOOL LAYER -->
+          <div class="s5-layer">
+            <div class="lhd">
+              <span class="nm">MCP Tool Layer</span>
+              <span class="sub">standardised tools agents call</span>
+            </div>
+            <div class="s5-tools">
+              <span class="tl">query_exceptions</span>
+              <span class="tl">get_cluster</span>
+              <span class="tl">search_precedents</span>
+              <span class="tl">send_owner_email</span>
+              <span class="tl">suggest_rule</span>
+              <span class="tl">summarise_month</span>
+              <span class="tl">materiality_score</span>
+            </div>
+          </div>
+
+          <!-- MODEL LAYER -->
+          <div class="s5-layer">
+            <div class="lhd">
+              <span class="nm">Model Layer</span>
+              <span class="sub">tiered routing — cheapest model that can do the job</span>
+            </div>
+            <div class="s5-models">
+              <span class="ml">Claude Opus<br><span style="font-weight:500;font-size:8.5px;color:var(--uq-text-mid);">heavy reasoning</span></span>
+              <span class="dt">·</span>
+              <span class="ml">Sonnet<br><span style="font-weight:500;font-size:8.5px;color:var(--uq-text-mid);">balanced</span></span>
+              <span class="dt">·</span>
+              <span class="ml">Haiku / Llama<br><span style="font-weight:500;font-size:8.5px;color:var(--uq-text-mid);">light + embeddings</span></span>
+            </div>
+          </div>
+
+          <!-- KNOWLEDGE -->
+          <div class="s5-layer knowledge">
+            <div class="lhd">
+              <span class="nm">Knowledge Layer (RAG)</span>
+              <span class="sub">retrieval-augmented context for every agent decision</span>
+            </div>
+            <div class="s5-cells">
+              <div class="s5-cell"><div class="ch">Charge-type ontology</div></div>
+              <div class="s5-cell"><div class="ch">Fee circulars &amp; RBI guidance</div></div>
+              <div class="s5-cell"><div class="ch">Prior rulings</div></div>
+              <div class="s5-cell"><div class="ch">Vector store</div><div class="cs">pgvector / Pinecone</div></div>
+            </div>
+          </div>
+
+          <!-- DATA -->
+          <div class="s5-layer data">
+            <div class="lhd">
+              <span class="nm">MCP Integration &amp; Data Layer</span>
+              <span class="sub">each bank source as an MCP server · read-only · CDC for fresh exceptions</span>
+            </div>
+            <div class="s5-cells">
+              <div class="s5-cell"><div class="ch">Core Banking</div><div class="cs">Finacle · Flexcube</div></div>
+              <div class="s5-cell"><div class="ch">Lending</div><div class="cs">Finone · LOS</div></div>
+              <div class="s5-cell"><div class="ch">Cards</div><div class="cs">VisionPlus · CardPro</div></div>
+              <div class="s5-cell"><div class="ch">Treasury &amp; Trade</div><div class="cs">Murex · Intellect</div></div>
+              <div class="s5-cell"><div class="ch">Policies &amp; GL</div><div class="cs">Circulars · SAP / Oracle GL</div></div>
+            </div>
+          </div>
+
+          <!-- OBSERVABILITY -->
+          <div class="s5-layer obs">
+            <div class="lhd">
+              <span class="nm">Observability &amp; Cost</span>
+              <span class="sub">platform-wide instrumentation</span>
+            </div>
+            <div class="s5-cells">
+              <div class="s5-cell"><div class="ch">Agent traces</div></div>
+              <div class="s5-cell"><div class="ch">LLM cost dashboards</div></div>
+              <div class="s5-cell"><div class="ch">Drift monitoring</div></div>
+              <div class="s5-cell"><div class="ch">Alerting</div></div>
+              <div class="s5-cell"><div class="ch">Token rate-limits</div></div>
+              <div class="s5-cell"><div class="ch">Log retention</div></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="s5-foot">
+        All inter-component traffic logged to the <b>audit log</b>  ·  every agent action passes through <b>guardrails</b>  ·  <b>human approval</b> enforced at every high-impact step.
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>5 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 6 · LICENSING COST
+       ======================================================================== -->
+  <section data-screen-label="06 Licensing Cost">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">7 · Licensing Cost</p>
+        <h2>Phase-wise · monthly run-rate at the end of each phase</h2>
+      </div>
+
+      <div class="body" style="top:78px;bottom:78px;">
+
+        <div class="s6-summary">
+          <div class="s6-card">
+            <div class="lbl">Phase 1  ·  end of month 4</div>
+            <div class="val">$5K – 8K</div>
+            <div class="ds"><b>~₹4–7 lakh / mo</b>  ·  foundation + 4 agents live</div>
+          </div>
+          <div class="s6-card p2">
+            <div class="lbl">Phase 2  ·  end of month 9</div>
+            <div class="val">$15K – 25K</div>
+            <div class="ds"><b>~₹13–22 lakh / mo</b>  ·  workflow + 3 more agents</div>
+          </div>
+          <div class="s6-card p3">
+            <div class="lbl">Phase 3  ·  end of month 14</div>
+            <div class="val">$40K – 75K</div>
+            <div class="ds"><b>~₹35–65 lakh / mo</b>  ·  full coverage + Rule Author</div>
+          </div>
+        </div>
+
+        <table class="s6-tbl">
+          <thead>
+            <tr>
+              <th style="text-align:left;">Component</th>
+              <th>Phase 1</th>
+              <th>Phase 2</th>
+              <th>Phase 3</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>LLM — heavy reasoning</td><td>$300 – 500</td><td>$2K – 4K</td><td>$6K – 11K</td></tr>
+            <tr><td>LLM — light + embeddings</td><td>$50 – 100</td><td>$500 – 1K</td><td>$2K – 4K</td></tr>
+            <tr><td>Agent orchestration</td><td>OSS (LangGraph)</td><td>OSS</td><td>Bedrock / Foundry &nbsp; <b>$1.5K – 3K</b></td></tr>
+            <tr><td>Knowledge graph + RAG</td><td>Neo4j Community + pgvector &nbsp; <b>$80 – 150</b></td><td>AuraDB Pro &nbsp; <b>$400 – 800</b></td><td>Business Critical + Pinecone &nbsp; <b>$5K – 12K</b></td></tr>
+            <tr><td>Workflow / dashboard</td><td>OSS, single VM &nbsp; <b>$0</b></td><td>Managed Postgres + UI &nbsp; <b>$400 – 800</b></td><td>Camunda + cockpit hosting &nbsp; <b>$1.5K – 3K</b></td></tr>
+            <tr><td>Observability + guardrails</td><td>Langfuse OSS &nbsp; <b>$50 – 150</b></td><td>Langfuse + Lakera &nbsp; <b>$500 – 1K</b></td><td>Arize · Datadog · Lakera &nbsp; <b>$2K – 5K</b></td></tr>
+            <tr><td>Cloud / infra</td><td>1 mid-size VM &nbsp; <b>$300 – 600</b></td><td>Multi-VM + HA &nbsp; <b>$2K – 5K</b></td><td>Multi-AZ DR, monitoring &nbsp; <b>$8K – 18K</b></td></tr>
+            <tr><td>Auth / SSO</td><td>Keycloak &nbsp; <b>$0</b></td><td>Keycloak / Okta starter &nbsp; <b>$200 – 500</b></td><td>Okta · Azure AD &nbsp; <b>$800 – 2K</b></td></tr>
+            <tr><td>Premium support</td><td>—</td><td>Best-effort</td><td>Vendor 24×7 &nbsp; <b>$2.5K – 5K</b></td></tr>
+            <tr><td>Contingency / buffer</td><td>+25%</td><td>+20%</td><td>+15%</td></tr>
+          </tbody>
+        </table>
+
+      </div>
+
+      <div class="s6-foot">
+        Costs are <b>cumulative</b> — Phase 3 figures include everything from Phases 1 &amp; 2.&nbsp;&nbsp;Excludes build team salaries <b>(~$300K – $1.2M depending on phase + scope)</b>.&nbsp;&nbsp;One-time setup at Phase 3: <b>USD 80–150K</b> (SI work + model-risk documentation).
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>6 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 7 · USER JOURNEY
+       ======================================================================== -->
+  <section data-screen-label="07 User Journey">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">6 · User Journey</p>
+        <h2>One exception, end to end · how the agents work together for the auditor</h2>
+      </div>
+
+      <div class="body" style="top:78px;bottom:24px;">
+
+        <div class="s7-case">
+          <span class="lbl">The Case</span>
+          <div class="msg">New credit card variant launched in March. Annual fee not repriced for 380 existing cardholders. <b>₹ 2.4 Cr undercharged.</b></div>
+        </div>
+
+        <div class="s7-timeline">
+
+          <div class="s7-step">
+            <div class="top"><div class="n">01</div><span class="when">Day 0</span></div>
+            <div class="act">Detection</div>
+            <div class="agent">Rule engine</div>
+            <div class="sec"><div class="lbl">Auditor sees</div>An alert appears on the dashboard. "400 new exceptions, Cards."</div>
+            <div class="sec warm"><div class="lbl">Auditor does</div>Opens the cluster · scans the materiality score</div>
+            <div class="time">2 min</div>
+          </div>
+
+          <div class="s7-step">
+            <div class="top"><div class="n">02</div><span class="when">Day 1</span></div>
+            <div class="act">Triage</div>
+            <div class="agent">Clustering + Scoring</div>
+            <div class="sec"><div class="lbl">Auditor sees</div>Not 400 rows — one cluster: "380 cards, annual fee at old rate." Ranked ₹2.4 Cr.</div>
+            <div class="sec warm"><div class="lbl">Auditor does</div>Reads the narrative · confirms the diagnosis is right</div>
+            <div class="time">30 min</div>
+          </div>
+
+          <div class="s7-step">
+            <div class="top"><div class="n">03</div><span class="when">Day 1</span></div>
+            <div class="act">Investigate</div>
+            <div class="agent">Precedent</div>
+            <div class="sec"><div class="lbl">Auditor sees</div>Two similar disputes from Q3. Both were upheld in the bank's favour.</div>
+            <div class="sec warm"><div class="lbl">Auditor does</div>Aligns the approach with prior rulings</div>
+            <div class="time">15 min</div>
+          </div>
+
+          <div class="s7-step">
+            <div class="top"><div class="n">04</div><span class="when">Day 2</span></div>
+            <div class="act">Act</div>
+            <div class="agent">Remediation</div>
+            <div class="sec"><div class="lbl">Auditor sees</div>Drafted email to Cards product owner in bank's template, ready to send.</div>
+            <div class="sec warm"><div class="lbl">Auditor does</div>Edits one line · approves · email goes out</div>
+            <div class="time">10 min</div>
+          </div>
+
+          <div class="s7-step">
+            <div class="top"><div class="n">05</div><span class="when">Day 8</span></div>
+            <div class="act">Resolve</div>
+            <div class="agent">Remediation</div>
+            <div class="sec"><div class="lbl">Auditor sees</div>Owner confirms fix. SLA met. Recovery posted to the GL.</div>
+            <div class="sec warm"><div class="lbl">Auditor does</div>Verifies in production data · closes the cluster</div>
+            <div class="time">10 min</div>
+          </div>
+
+          <div class="s7-step">
+            <div class="top"><div class="n">06</div><span class="when">Month-end</span></div>
+            <div class="act">Report</div>
+            <div class="agent">Month-End Narrative</div>
+            <div class="sec"><div class="lbl">Auditor sees</div>Auto-drafted executive RA report cites this case with full lineage.</div>
+            <div class="sec warm"><div class="lbl">Auditor does</div>Reviews citations · approves · sends to CAE / IA Head</div>
+            <div class="time">20 min</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>7 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 8 · THE BUILD PLAN
+       ======================================================================== -->
+  <section data-screen-label="08 The Build Plan">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">8 · The Build Plan</p>
+        <h2>Developing the Phase 1 MVP &nbsp;·&nbsp; <span style="font-weight:600;color:var(--uq-text-mid);font-size:14px;">scope: 5 charges · dashboard · 3 agents · chat &nbsp;·&nbsp; 3 weeks total</span></h2>
+      </div>
+
+      <div class="body" style="top:74px;bottom:48px;">
+        <div class="s8-rows">
+
+          <div class="s8-row">
+            <div class="wk"><span class="w">Week 1</span><span class="nm">Data foundation</span></div>
+            <div class="bd">
+              <div class="it">Pick 5 charges from KPMG list (start simple: Cards annual fee, late fee, FX markup, loan processing fee, swift charges)</div>
+              <div class="it">Read those 5 SQL scripts · identify source tables and columns needed</div>
+              <div class="it">Vibe-code synthetic data generator in Python (Faker + pandas) — match Finacle/Finone column shapes</div>
+              <div class="it">Load to Supabase Postgres · ~10K transactions per charge type · run KPMG scripts → confirm exceptions surface</div>
+            </div>
+            <div class="tag"><span class="lbl">Mode</span><span class="val">Vibe + Traditional</span></div>
+          </div>
+
+          <div class="s8-row">
+            <div class="wk"><span class="w">Week 1</span><span class="nm">Rule engine + exception store</span></div>
+            <div class="bd">
+              <div class="it">Python wrapper to execute the 5 SQL scripts on schedule (APScheduler) · log every run</div>
+              <div class="it">Exception store schema: rule_id, txn_id, expected, actual, delta, status, cluster_id · idempotent writes</div>
+              <div class="it">FastAPI backend: /rules, /exceptions, /clusters endpoints · /healthz · JSON only · no auth (single demo user)</div>
+              <div class="it">Smoke test: each rule produces deterministic exceptions on the synthetic data</div>
+            </div>
+            <div class="tag"><span class="lbl">Mode</span><span class="val">Traditional</span></div>
+          </div>
+
+          <div class="s8-row w2">
+            <div class="wk"><span class="w">Week 2</span><span class="nm">Three agents</span></div>
+            <div class="bd">
+              <div class="it">Clustering agent: embed narratives (text-embedding-3-small) → HDBSCAN in Python · stable cluster IDs</div>
+              <div class="it">Scoring &amp; Narrative agent: Claude Sonnet 4.6 via Anthropic SDK · prompt = cluster + 5–20 examples + materiality · structured JSON output</div>
+              <div class="it">Dashboard Chat agent: tool-use loop with 4 tools (query_exceptions, get_cluster, leakage_summary, rule_status) · streaming</div>
+              <div class="it">Test each agent on 20 hand-crafted scenarios · add prompt caching headers (cuts API spend ~70%)</div>
+            </div>
+            <div class="tag"><span class="lbl">Mode</span><span class="val">Vibe + Traditional</span></div>
+          </div>
+
+          <div class="s8-row w3a">
+            <div class="wk"><span class="w">Week 3</span><span class="nm">Dashboard + Live AI Insights</span></div>
+            <div class="bd">
+              <div class="it">Next.js 15 app · shadcn/ui · Tailwind · 3 pages: Dashboard, Exceptions, Chat</div>
+              <div class="it">Dashboard: KPI cards (leakage detected, recovered, pending) · trend chart (Recharts) · cluster list</div>
+              <div class="it">Live AI Insights: Claude generates 3 one-line insights from current data every 6 hours · cached in Postgres</div>
+              <div class="it">Exceptions: cluster view → drill-down · narrative · approve/dispute (no-op for demo) · Chat: streaming with tool-call indicators</div>
+              <div class="it">Deploy frontend to Vercel · backend to Railway · custom domain (optional)</div>
+            </div>
+            <div class="tag"><span class="lbl">Mode</span><span class="val">Vibe Coding</span></div>
+          </div>
+
+          <div class="s8-row w3b">
+            <div class="wk"><span class="w">Week 3</span><span class="nm">Polish &amp; demo prep</span></div>
+            <div class="bd">
+              <div class="it">Seed a realistic demo scenario: new credit card variant → 400 exceptions → 1 dominant cluster → ₹2.4 Cr material</div>
+              <div class="it">Record 5-min Loom walkthrough using the credit card variant story</div>
+              <div class="it">Write README · simple architecture diagram · cost breakdown · setup instructions</div>
+              <div class="it">End-to-end test · fix obvious gaps · password-protect dashboard for demos</div>
+            </div>
+            <div class="tag"><span class="lbl">Mode</span><span class="val">Polish</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="s8-foot">
+        <div class="msg"><b>Done when:</b> demo runs end-to-end on synthetic data  ·  3 agents return sensible output  ·  dashboard + chat live on a URL  ·  5-min Loom recorded.</div>
+        <div class="src">Total API spend: ~$80–250 · Claude Code Pro $20/mo × 3 = $60</div>
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>8 / 9</b></div>
+    </div>
+  </section>
+
+
+  <!-- ========================================================================
+       SLIDE 9 · TECHNICAL ARCHITECTURE
+       ======================================================================== -->
+  <section data-screen-label="09 Technical Architecture">
+    <div class="uq-slide light">
+      <img class="uq-logo" src="assets/logo-uniqus.png" alt="Uniqus">
+      <div class="uq-brand-line"></div>
+
+      <div class="title">
+        <p class="eyebrow">5 · Technical Architecture</p>
+        <h2>Six layers · swap any component without breaking the others</h2>
+      </div>
+
+      <div class="body" style="top:78px;bottom:24px;">
+
+        <table class="s9-tbl">
+          <thead>
+            <tr>
+              <th style="width:140px;">Layer</th>
+              <th style="width:230px;">Purpose</th>
+              <th>MVP option</th>
+              <th>Enterprise option</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Data Sources</td>
+              <td>Core banking, lending, treasury, GL</td>
+              <td>Read-only access to existing <b>ODS / warehouse</b></td>
+              <td>Same — direct read on <b>bank perimeter</b></td>
+            </tr>
+            <tr>
+              <td>Data Plane</td>
+              <td>Where rules run, exceptions land</td>
+              <td>Existing warehouse · <b>Postgres</b> for app data</td>
+              <td><b>Snowflake</b> · <b>Databricks</b> · Hadoop / Hive</td>
+            </tr>
+            <tr>
+              <td>Knowledge</td>
+              <td>Charge-type graph + Policy RAG store</td>
+              <td><b>Neo4j Community</b> · pgvector</td>
+              <td><b>Neo4j AuraDB</b> · Pinecone Enterprise</td>
+            </tr>
+            <tr>
+              <td>Agent Runtime</td>
+              <td>8 agents · LLM gateway · tool use</td>
+              <td><b>Sonnet 4.6 + Haiku 4.5</b> via API · LangGraph</td>
+              <td><b>Opus 4.7</b> on Bedrock / Azure · Bedrock Agents</td>
+            </tr>
+            <tr>
+              <td>Governance</td>
+              <td>Guardrails, audit log, evaluator</td>
+              <td><b>Llama Guard + Presidio</b> · Langfuse self-host</td>
+              <td><b>Lakera Guard / NeMo</b> · Arize / Datadog LLM</td>
+            </tr>
+            <tr>
+              <td>Experience</td>
+              <td>Dashboard, chat, workflow, SSO</td>
+              <td><b>FastAPI + React + Keycloak</b> (OSS)</td>
+              <td><b>ServiceNow / Camunda</b> · Okta / Azure AD</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="s9-tags">
+          <div class="s9-tag">
+            <div class="ttl">Modular by design</div>
+            <div class="ds">Swap any layer without rewriting the others.</div>
+          </div>
+          <div class="s9-tag" style="background:var(--uq-blush);">
+            <div class="ttl" style="color:var(--uq-magenta);">Defensive by default</div>
+            <div class="ds">Every prompt, query, decision logged. Human approval on high-impact actions.</div>
+          </div>
+          <div class="s9-tag" style="background:var(--uq-dark-purple);">
+            <div class="ttl" style="color:#fff;">Deploys where data lives</div>
+            <div class="ds" style="color:rgba(255,255,255,.88);">Cloud SaaS or fully on-prem inside the bank perimeter.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pg">Revenue Assurance · Agentic AI Tool &nbsp;·&nbsp; <b>9 / 9</b></div>
+    </div>
+  </section>
+
+
+</deck-stage>
+
+<script src="deck-stage.js"></script>
+</body>
+</html>

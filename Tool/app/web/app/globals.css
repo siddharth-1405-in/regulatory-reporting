@@ -1,0 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: light; }
+
+body {
+  background: #FBF9FD;
+  color: #333;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .eyebrow {
+    @apply font-display font-extrabold uppercase text-uq-magenta;
+    font-size: 9px; letter-spacing: 0.16em;
+  }
+  .panel {
+    @apply bg-white rounded-card shadow-card border border-uq-border-2;
+  }
+  .panel-title { @apply font-display font-extrabold text-uq-dark-purple; font-size: 14px; letter-spacing: -0.01em; }
+  .kpi-label { @apply font-display font-bold uppercase text-uq-muted; font-size: 9.5px; letter-spacing: 0.12em; }
+  .num { font-variant-numeric: tabular-nums; }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-pill px-2 py-0.5 font-display font-extrabold uppercase;
+    font-size: 9px; letter-spacing: 0.08em;
+  }
+}
+
+@keyframes pulse-halo { 0% { box-shadow: 0 0 0 0 rgba(179,30,124,.45);} 70%{box-shadow:0 0 0 6px rgba(179,30,124,0);} 100%{box-shadow:0 0 0 0 rgba(179,30,124,0);} }
+.dot-live { animation: pulse-halo 1.6s infinite; }

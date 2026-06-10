@@ -1,0 +1,155 @@
+/* =========================================================================
+   UNIQUS SLIDE SYSTEM — slides.css
+   1280×720 canvas (= 13.33"×7.5" @ ~96dpi). Pair with colors_and_type.css.
+   ========================================================================= */
+.uq-slide{
+  position:relative;
+  width:1280px;height:720px;
+  background:#fff;
+  font-family:var(--font-body);
+  color:var(--fg-2);
+  overflow:hidden;
+}
+
+/* ---- shared chrome ---- */
+.uq-logo{position:absolute;top:24px;right:48px;height:34px;z-index:3;}
+.uq-logo.invert{filter:brightness(0) invert(1);}
+.uq-brand-line{
+  position:absolute;top:68px;right:48px;width:170px;height:4px;
+  background:linear-gradient(90deg,#B31E7C 0%,#A28BBD 100%);
+  border-radius:2px;z-index:3;
+}
+
+/* ---- LIGHT CONTENT layout ---- */
+.uq-slide.light{background:#fff;}
+.uq-slide.light::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:10px;
+  background:#492079;z-index:2;
+}
+.uq-slide.light .title{
+  position:absolute;left:48px;top:24px;right:260px;z-index:2;
+}
+.uq-slide.light .eyebrow{
+  font-family:var(--font-display);font-weight:700;
+  font-size:14px;letter-spacing:.08em;text-transform:uppercase;
+  color:#B31E7C;margin:0 0 4px;
+}
+.uq-slide.light .title h2{
+  margin:0;font-family:var(--font-display);font-weight:800;
+  font-size:38px;color:#492079;line-height:1.05;letter-spacing:-0.01em;
+}
+.uq-slide.light .title .sub{
+  margin:6px 0 0;font-size:18px;color:#555;font-weight:500;
+}
+.uq-slide.light .body{
+  position:absolute;left:48px;right:48px;top:148px;bottom:120px;
+}
+
+/* ---- DARK content + section + title ---- */
+.uq-slide.dark{background:#3B2162;color:#fff;}
+.uq-slide.dark .title h2{color:#fff;}
+.uq-slide.dark .eyebrow{color:#C879AB;}
+
+/* ---- TITLE slide ---- */
+.uq-slide.title-slide{
+  background:
+    linear-gradient(115deg,#3B2162 0%,#3B2162 44%,#492079 68%,#B31E7C 100%);
+}
+.uq-slide.title-slide .title-block{
+  position:absolute;left:60px;top:230px;right:540px;color:#fff;
+}
+.uq-slide.title-slide h1{
+  margin:0;font-family:var(--font-display);font-weight:800;
+  font-size:60px;line-height:1.02;letter-spacing:-0.02em;color:#fff;
+}
+.uq-slide.title-slide .sub{
+  margin:18px 0 0;font-size:22px;color:#E1D9EB;line-height:1.4;font-weight:500;
+}
+.uq-slide.title-slide .eyebrow{
+  font-family:var(--font-display);font-weight:800;font-size:13px;
+  letter-spacing:.18em;text-transform:uppercase;color:#C879AB;margin:0 0 18px;
+}
+.uq-slide.title-slide .photo{
+  position:absolute;right:80px;top:130px;width:440px;height:440px;
+  border-radius:50%;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+}
+.uq-slide.title-slide .photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(.3) contrast(1.05) brightness(.95);}
+.uq-slide.title-slide .photo .ring{
+  position:absolute;inset:-14px;border-radius:50%;border:2px solid rgba(255,255,255,.18);
+}
+.uq-slide.title-slide .footer-tag{
+  position:absolute;left:60px;bottom:50px;color:#A28BBD;
+  font-family:var(--font-display);font-weight:700;font-size:14px;letter-spacing:.06em;
+  display:flex;align-items:center;gap:14px;
+}
+.uq-slide.title-slide .footer-tag::before{
+  content:"";width:38px;height:3px;background:#B31E7C;display:block;
+}
+
+/* ---- SECTION DIVIDER ---- */
+.uq-slide.section{background:#3B2162;}
+.uq-slide.section .num{
+  position:absolute;left:80px;top:120px;color:#B31E7C;
+  font-family:var(--font-display);font-weight:800;font-size:140px;line-height:1;letter-spacing:-0.04em;opacity:.9;
+}
+.uq-slide.section .title-block{
+  position:absolute;left:80px;top:300px;right:520px;
+}
+.uq-slide.section h2{
+  margin:0;font-family:var(--font-display);font-weight:800;
+  font-size:72px;color:#fff;line-height:1;letter-spacing:-0.02em;
+}
+.uq-slide.section .eyebrow{
+  font-family:var(--font-display);font-weight:800;font-size:13px;
+  letter-spacing:.18em;text-transform:uppercase;color:#C879AB;margin:0 0 20px;
+}
+.uq-slide.section .sub{
+  margin:20px 0 0;font-size:20px;color:#A28BBD;font-weight:500;max-width:560px;line-height:1.4;
+}
+.uq-slide.section .photo{
+  position:absolute;right:80px;top:130px;width:440px;height:440px;
+  border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.1);
+}
+.uq-slide.section .photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(.2);}
+
+/* ---- BUILDING BLOCKS ---- */
+.card{
+  background:#E1D9EB;border-radius:14px;padding:22px 26px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+.card.warm{background:#EED8E6;}
+.card.neutral{background:#FAFAFA;}
+.card.dark{background:#492079;color:#fff;position:relative;padding-left:30px;}
+.card.dark::before{content:"";position:absolute;left:0;top:18px;bottom:18px;width:5px;background:#B31E7C;border-radius:0 4px 4px 0;}
+.card h3{margin:0 0 8px;font-family:var(--font-display);font-weight:800;font-size:22px;color:#492079;line-height:1.15;}
+.card.dark h3{color:#fff;}
+.card p{margin:0;font-size:17px;color:#333;line-height:1.45;}
+.card.dark p{color:#CCCCCC;}
+
+/* Step circles */
+.step-circle{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;color:#fff;font-size:24px;flex-shrink:0;}
+.step-circle.p{background:#492079;}
+.step-circle.m{background:#B31E7C;}
+
+/* Section badge */
+.badge{
+  display:inline-block;background:#B31E7C;color:#fff;
+  font-family:var(--font-display);font-weight:800;font-size:12px;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:6px 14px;border-radius:999px;
+}
+
+/* Warning callout footer */
+.callout{
+  position:absolute;left:48px;right:48px;bottom:36px;
+  border-radius:10px;padding:14px 22px;display:flex;align-items:center;gap:14px;
+  font-size:17px;line-height:1.35;
+}
+.callout.bold{background:#B31E7C;color:#fff;font-style:italic;font-weight:600;}
+.callout.soft{background:#EED8E6;color:#492079;font-style:italic;}
+.callout.dark{background:#3B2162;color:#fff;font-style:italic;font-weight:600;}
+.callout .ic{font-style:normal;font-size:20px;flex-shrink:0;}
+
+/* Top header bar (Pattern J) */
+.header-bar{position:absolute;left:0;right:0;top:138px;height:6px;background:#492079;z-index:1;}

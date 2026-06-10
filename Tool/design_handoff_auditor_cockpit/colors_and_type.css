@@ -1,0 +1,209 @@
+/* =========================================================================
+   UNIQUS DESIGN SYSTEM — Colors & Typography
+   Single source of truth. Load this in every HTML artifact.
+   ========================================================================= */
+
+/* ---------- Webfonts ----------
+   Mont Bold is the brand display font. We ship a Google-Fonts substitute
+   (Montserrat 800) and Inter as the Calibri stand-in until the user
+   provides the licensed .ttf/.otf files.
+   ⚠ SUBSTITUTION FLAG — replace these @font-face declarations with the
+   real Mont and Calibri files when available.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* ====== CORE BRAND COLORS ====== */
+  --uq-purple:           #492079;  /* Brand Primary — Deep Purple */
+  --uq-magenta:          #B31E7C;  /* Brand Accent — Magenta */
+  --uq-lavender:         #A28BBD;  /* Brand Mid — Lavender */
+  --uq-mauve:            #C879AB;  /* Brand Tone — Dusty Rose / Mauve */
+  --uq-light-lavender:   #E1D9EB;  /* Brand Light 1 — card fills */
+  --uq-blush:            #EED8E6;  /* Brand Light 2 — warm card fills */
+  --uq-dark-purple:      #3B2162;  /* Brand Dark — dark slides */
+
+  /* ====== NEUTRALS ====== */
+  --uq-white:            #FFFFFF;
+  --uq-near-white:       #FAFAFA;  /* Stat cards, neutral fills */
+  --uq-alt-light:        #F5F0FA;  /* Alternating table rows */
+  --uq-divider:          #E1D9EB;  /* Same as light-lavender, semantic */
+  --uq-black:            #000000;
+
+  /* ====== TEXT ====== */
+  --uq-text-dark:        #333333;  /* Body on light bg */
+  --uq-text-mid:         #555555;  /* Secondary labels */
+  --uq-text-muted:       #666666;  /* Captions, footnotes */
+  --uq-text-on-dark:     #FFFFFF;  /* Body on dark bg */
+  --uq-text-on-dark-2:   #A28BBD;  /* Lavender supporting on dark bg */
+  --uq-text-on-dark-3:   #CCCCCC;  /* Card body on dark slides */
+
+  /* ====== SEMANTIC FOREGROUNDS ====== */
+  --fg-1: var(--uq-purple);        /* Primary (titles, brand) */
+  --fg-2: var(--uq-text-dark);     /* Body */
+  --fg-3: var(--uq-text-mid);      /* Secondary */
+  --fg-4: var(--uq-text-muted);    /* Tertiary */
+  --fg-inverse: var(--uq-white);
+
+  /* ====== SEMANTIC BACKGROUNDS ====== */
+  --bg-1: var(--uq-white);         /* Default slide / page */
+  --bg-2: var(--uq-near-white);    /* Stat cards */
+  --bg-3: var(--uq-alt-light);     /* Alt row */
+  --bg-card-cool: var(--uq-light-lavender);
+  --bg-card-warm: var(--uq-blush);
+  --bg-dark: var(--uq-dark-purple);
+  --bg-dark-card: var(--uq-purple);
+
+  /* ====== ACCENT / SEMANTIC ====== */
+  --accent-primary: var(--uq-purple);
+  --accent-secondary: var(--uq-magenta);
+  --accent-soft: var(--uq-lavender);
+  --accent-warm: var(--uq-mauve);
+
+  --warn-bold-bg: var(--uq-magenta);
+  --warn-bold-fg: var(--uq-white);
+  --warn-soft-bg: var(--uq-blush);
+  --warn-soft-fg: var(--uq-purple);
+
+  /* ====== BRAND GRADIENTS ====== */
+  --grad-title:       linear-gradient(115deg, var(--uq-dark-purple) 0%, var(--uq-dark-purple) 45%, var(--uq-purple) 70%, var(--uq-magenta) 100%);
+  --grad-line:        linear-gradient(90deg, var(--uq-magenta) 0%, var(--uq-lavender) 100%);
+  --grad-symbol:      linear-gradient(135deg, var(--uq-dark-purple) 0%, var(--uq-purple) 50%, var(--uq-magenta) 100%);
+
+  /* ====== TYPE — FAMILIES ====== */
+  --font-display: 'Montserrat', 'Mont Bold', 'Arial Black', Georgia, sans-serif;
+  --font-body:    'Inter', 'Calibri', 'Calibri Light', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ====== TYPE — WEIGHTS ====== */
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+  --fw-black:   800;  /* For Mont Bold substitute on hero titles */
+
+  /* ====== TYPE — SCALE (web px, mirrors 13.33"×7.5" canvas at 144dpi-ish) ======
+     Slide canvas: 1280×720 web preview = 13.33"×7.5" PPT.
+     Sizes below are web-px values that match the pt sizes in the spec
+     when rendered onto a 1280-wide slide. */
+  --fs-title-hero:      52px;  /* Title slide title (36-40pt scaled) */
+  --fs-section-divider: 64px;  /* 44-48pt */
+  --fs-slide-title:     38px;  /* 26-30pt */
+  --fs-section-header:  32px;  /* 22-26pt */
+  --fs-card-title:      28px;  /* 20-22pt */
+  --fs-card-body:       20px;  /* 16-18pt */
+  --fs-body:            22px;  /* 18-20pt body */
+  --fs-stat-value:      96px;  /* 56-80pt */
+  --fs-stat-label:      22px;  /* 18pt */
+  --fs-badge:           16px;  /* 12-14pt section pill */
+  --fs-callout:         20px;  /* 16-18pt warning */
+  --fs-table-header:    20px;
+  --fs-table-body:      18px;
+  --fs-caption:         16px;
+  --fs-process-label:   16px;
+
+  /* ====== SPACING (slide-scale) ====== */
+  --sp-edge:   48px;   /* min margin from slide edges (~0.5") */
+  --sp-block:  32px;   /* between content blocks (~0.3-0.5") */
+  --sp-card:   16px;   /* internal card padding base */
+  --sp-row:    24px;   /* between rows */
+  --sp-tight:  8px;
+  --sp-xtight: 4px;
+
+  /* ====== RADII ====== */
+  --r-card:    14px;
+  --r-pill:    999px;
+  --r-callout: 10px;
+  --r-photo:   50%;   /* circular topic photos */
+  --r-small:   6px;
+
+  /* ====== SHADOWS ====== */
+  --shadow-card: 0 2px 4px rgba(0,0,0,0.08);
+  --shadow-elevated: 0 2px 4px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06);
+  --shadow-soft: 0 1px 2px rgba(73, 32, 121, 0.08);
+
+  /* ====== BORDERS / BARS ====== */
+  --bar-left-width: 10px;    /* left purple accent bar (~0.12") */
+  --bar-top-height: 8px;     /* stat card top accent (~0.08") */
+  --bar-header-height: 10px; /* full-width header bar (~0.1") */
+  --bar-process-connector: 2px;
+}
+
+/* =========================================================================
+   SEMANTIC TYPOGRAPHY ELEMENTS
+   ========================================================================= */
+body { font-family: var(--font-body); color: var(--fg-2); }
+
+.uq-h1, h1.uq {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-title-hero);
+  color: var(--fg-inverse);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+.uq-h-section {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-section-divider);
+  color: var(--fg-inverse);
+  letter-spacing: -0.01em;
+  line-height: 1.0;
+}
+.uq-h2, h2.uq {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-slide-title);
+  color: var(--fg-1);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.uq-h3, h3.uq {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-card-title);
+  color: var(--fg-1);
+  line-height: 1.15;
+}
+.uq-body, p.uq {
+  font-family: var(--font-body);
+  font-weight: var(--fw-regular);
+  font-size: var(--fs-body);
+  color: var(--fg-2);
+  line-height: 1.45;
+}
+.uq-card-body {
+  font-family: var(--font-body);
+  font-size: var(--fs-card-body);
+  color: var(--fg-2);
+  line-height: 1.4;
+}
+.uq-caption {
+  font-family: var(--font-body);
+  font-size: var(--fs-caption);
+  color: var(--fg-4);
+}
+.uq-badge {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-badge);
+  color: var(--uq-white);
+  background: var(--uq-magenta);
+  border-radius: var(--r-pill);
+  padding: 6px 14px;
+  display: inline-block;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.uq-stat-value {
+  font-family: var(--font-display);
+  font-weight: var(--fw-black);
+  font-size: var(--fs-stat-value);
+  color: var(--fg-1);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.uq-stat-label {
+  font-family: var(--font-body);
+  font-size: var(--fs-stat-label);
+  color: var(--fg-4);
+}

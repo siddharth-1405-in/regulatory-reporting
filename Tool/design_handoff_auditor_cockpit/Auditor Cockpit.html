@@ -1,0 +1,1245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Auditor Cockpit · Revenue Assurance</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  /* =========================================================================
+     AUDITOR COCKPIT — Internal Audit Head, Revenue Assurance
+     1440 × 980 base canvas, scaled to viewport.
+     Uniqus palette, dense executive layout, dynamic live elements.
+     ========================================================================= */
+  html, body{ margin:0; padding:0; background:#0F0820; font-family:var(--font-body); }
+  *{ box-sizing:border-box; }
+
+  /* ---- scaling stage ---- */
+  .stage{
+    position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(1200px 700px at 80% -10%, rgba(179,30,124,.22), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(73,32,121,.45), transparent 60%),
+      #0F0820;
+  }
+  .canvas{
+    width:1440px; height:1120px;
+    background:#FBF9FD;
+    transform-origin:center center;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.35);
+  }
+
+  /* ---- typography helpers ---- */
+  .eyebrow{
+    font-family:var(--font-display); font-weight:800;
+    font-size:9.5px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--uq-magenta);
+  }
+  .eyebrow.mute{ color:var(--uq-text-muted); }
+  .eyebrow.purple{ color:var(--uq-purple); }
+  .eyebrow.dark{ color:var(--uq-dark-purple); }
+  .panel-title{
+    font-family:var(--font-display); font-weight:800;
+    font-size:14px; color:var(--uq-purple); letter-spacing:-0.01em;
+    line-height:1.1;
+  }
+  .mono{ font-family:var(--font-mono); }
+
+  /* =========================================================================
+     TOP BAR
+     ========================================================================= */
+  .topbar{
+    height:60px; background:#fff;
+    border-bottom:1px solid #ECE4F2;
+    display:flex; align-items:center; padding:0 22px;
+    position:relative; z-index:5;
+  }
+  .topbar::after{
+    content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+    background:linear-gradient(90deg, var(--uq-dark-purple) 0%, var(--uq-purple) 35%, var(--uq-magenta) 70%, var(--uq-mauve) 100%);
+  }
+  .brand{ display:flex; align-items:center; gap:14px; min-width:0; }
+  .brand .logo{
+    width:34px; height:34px; border-radius:9px; flex-shrink:0;
+    background:linear-gradient(135deg, var(--uq-dark-purple) 0%, var(--uq-purple) 50%, var(--uq-magenta) 100%);
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-family:var(--font-display); font-weight:800; font-size:16px;
+    letter-spacing:-0.03em; box-shadow:0 4px 14px rgba(73,32,121,.35);
+  }
+  .brand .nm{
+    font-family:var(--font-display); font-weight:800; font-size:14px;
+    color:var(--uq-dark-purple); line-height:1; letter-spacing:-0.01em;
+  }
+  .brand .sub{
+    font-size:10.5px; color:var(--uq-text-muted); margin-top:2px;
+    font-weight:500; letter-spacing:.02em;
+  }
+  .brand .sep{
+    width:1px; height:30px; background:#ECE4F2; margin:0 6px;
+  }
+  .crumbs{
+    display:flex; align-items:center; gap:8px;
+    font-family:var(--font-display); font-weight:700; font-size:11px;
+    color:var(--uq-text-muted); letter-spacing:.02em;
+  }
+  .crumbs .here{ color:var(--uq-purple); }
+  .crumbs .arr{ color:#C9BAD8; }
+
+  .top-actions{ margin-left:auto; display:flex; align-items:center; gap:10px; }
+  .seg{
+    display:inline-flex; background:#F4EEFA; border-radius:8px; padding:3px;
+    border:1px solid #E6DCF0;
+  }
+  .seg button{
+    border:0; background:transparent; cursor:pointer;
+    font-family:var(--font-display); font-weight:700; font-size:10.5px;
+    color:var(--uq-text-mid); padding:6px 12px; border-radius:6px;
+    letter-spacing:.04em;
+  }
+  .seg button.on{
+    background:#fff; color:var(--uq-purple);
+    box-shadow:0 1px 3px rgba(73,32,121,.18);
+  }
+  .pill-btn{
+    display:inline-flex; align-items:center; gap:7px;
+    background:#fff; border:1px solid #E6DCF0; border-radius:8px;
+    padding:7px 11px; cursor:pointer;
+    font-family:var(--font-display); font-weight:700; font-size:10.5px;
+    color:var(--uq-text-dark); letter-spacing:.02em;
+  }
+  .pill-btn .cal{ width:6px; height:6px; border-radius:50%; background:var(--uq-magenta);
+    box-shadow:0 0 0 4px rgba(179,30,124,.18); animation:pulse 1.8s infinite; }
+  .pill-btn .ic{ color:var(--uq-purple); font-weight:800; }
+  .pill-btn.icon{ padding:7px 9px; }
+  .pill-btn .b{ color:var(--uq-purple); }
+  @keyframes pulse{
+    0%,100%{ box-shadow:0 0 0 4px rgba(179,30,124,.18); }
+    50%{ box-shadow:0 0 0 8px rgba(179,30,124,.04); }
+  }
+
+  .user{
+    display:flex; align-items:center; gap:9px;
+    padding:4px 10px 4px 4px; background:#F8F3FB; border-radius:999px;
+    border:1px solid #ECE4F2;
+  }
+  .user .av{
+    width:30px; height:30px; border-radius:50%;
+    background:linear-gradient(135deg, var(--uq-magenta), var(--uq-purple));
+    color:#fff; font-family:var(--font-display); font-weight:800; font-size:11px;
+    display:flex; align-items:center; justify-content:center; letter-spacing:.02em;
+  }
+  .user .info{ line-height:1.1; }
+  .user .info .nm{ font-family:var(--font-display); font-weight:800; font-size:11px; color:var(--uq-dark-purple); }
+  .user .info .rl{ font-size:9.5px; color:var(--uq-text-muted); margin-top:1px; }
+
+  /* =========================================================================
+     CONTEXT BAR — period, scope, last refresh
+     ========================================================================= */
+  .ctxbar{
+    background:#fff; border-bottom:1px solid #ECE4F2;
+    padding:10px 22px; display:flex; align-items:center; gap:18px;
+  }
+  .ctx-title{ display:flex; flex-direction:column; gap:2px; }
+  .ctx-title .eb{ font-family:var(--font-display); font-weight:800; font-size:9.5px; letter-spacing:.18em; color:var(--uq-magenta); text-transform:uppercase; }
+  .ctx-title h1{
+    margin:0; font-family:var(--font-display); font-weight:800;
+    font-size:20px; color:var(--uq-dark-purple); letter-spacing:-0.015em; line-height:1;
+  }
+  .ctx-divider{ width:1px; height:34px; background:#ECE4F2; }
+  .ctx-stat{ display:flex; flex-direction:column; gap:2px; line-height:1; }
+  .ctx-stat .k{ font-family:var(--font-display); font-weight:700; font-size:9px; letter-spacing:.14em; color:var(--uq-text-muted); text-transform:uppercase; }
+  .ctx-stat .v{ font-family:var(--font-display); font-weight:800; font-size:13px; color:var(--uq-dark-purple); }
+  .ctx-stat .v.acc{ color:var(--uq-magenta); }
+  .ctx-stat .v.ok{ color:#1F8A5B; }
+  .ctxbar .right{ margin-left:auto; display:flex; align-items:center; gap:10px; }
+  .live-tag{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--font-display); font-weight:800; font-size:9.5px;
+    letter-spacing:.14em; color:#1F8A5B; padding:5px 10px;
+    background:rgba(31,138,91,.10); border-radius:999px;
+  }
+  .live-tag .dt{ width:6px; height:6px; border-radius:50%; background:#1F8A5B; animation:pulse-g 1.4s infinite; }
+  @keyframes pulse-g{
+    0%,100%{ box-shadow:0 0 0 0 rgba(31,138,91,.55); }
+    70%{ box-shadow:0 0 0 6px rgba(31,138,91,0); }
+  }
+
+  /* =========================================================================
+     MAIN LAYOUT
+     ========================================================================= */
+  .main{
+    position:absolute; left:0; right:0; top:118px; bottom:0;
+    padding:12px 22px 14px;
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    grid-template-rows: 90px 250px 268px 168px 1fr;
+    gap:10px;
+  }
+
+  /* =========================================================================
+     KPI STRIP
+     ========================================================================= */
+  .kpi-strip{
+    grid-column: 1 / -1;
+    display:grid; grid-template-columns:repeat(6, 1fr); gap:10px;
+  }
+  .kpi{
+    background:#fff; border-radius:12px; padding:11px 13px 12px;
+    box-shadow:0 1px 3px rgba(73,32,121,.06), 0 8px 20px rgba(73,32,121,.04);
+    position:relative; overflow:hidden;
+    display:flex; flex-direction:column; gap:4px;
+    border:1px solid #F0E8F6;
+  }
+  .kpi::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background:var(--uq-purple);
+  }
+  .kpi.acc::before{ background:var(--uq-magenta); }
+  .kpi.warn::before{ background:#E27A2A; }
+  .kpi.ok::before{ background:#1F8A5B; }
+  .kpi.dark{ background:linear-gradient(160deg, var(--uq-dark-purple) 0%, var(--uq-purple) 100%); color:#fff; }
+  .kpi.dark::before{ background:var(--uq-magenta); }
+  .kpi .lb{
+    font-family:var(--font-display); font-weight:700; font-size:9.5px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--uq-text-muted);
+  }
+  .kpi.dark .lb{ color:var(--uq-mauve); }
+  .kpi .vl{
+    font-family:var(--font-display); font-weight:800; font-size:26px;
+    color:var(--uq-dark-purple); letter-spacing:-0.02em; line-height:1;
+  }
+  .kpi.dark .vl{ color:#fff; }
+  .kpi .un{ font-size:13px; color:var(--uq-text-muted); margin-left:3px; font-weight:700; }
+  .kpi.dark .un{ color:var(--uq-mauve); }
+  .kpi .ft{
+    display:flex; align-items:center; gap:6px; margin-top:auto;
+    font-size:10px; color:var(--uq-text-muted);
+  }
+  .kpi .ch{
+    font-family:var(--font-display); font-weight:800; font-size:10px;
+    color:#1F8A5B; padding:2px 6px; background:rgba(31,138,91,.10); border-radius:4px;
+  }
+  .kpi .ch.dn{ color:#C03A3A; background:rgba(192,58,58,.10); }
+  .kpi .ch.fl{ color:var(--uq-magenta); background:rgba(179,30,124,.10); }
+  .kpi.dark .ch{ color:#9CE0BD; background:rgba(255,255,255,.10); }
+  .kpi.dark .ft{ color:rgba(255,255,255,.65); }
+
+  .spark{ position:absolute; right:10px; top:10px; opacity:.85; }
+
+  /* =========================================================================
+     PANELS — generic
+     ========================================================================= */
+  .panel{
+    background:#fff; border-radius:14px; padding:14px;
+    box-shadow:0 1px 3px rgba(73,32,121,.06), 0 8px 20px rgba(73,32,121,.04);
+    border:1px solid #F0E8F6;
+    display:flex; flex-direction:column; min-height:0;
+  }
+  .panel .hd{
+    display:flex; align-items:center; gap:10px; margin-bottom:12px;
+  }
+  .panel .hd .ttl{ display:flex; flex-direction:column; gap:2px; }
+  .panel .hd .ai{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--font-display); font-weight:800; font-size:8.5px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--uq-magenta);
+    background:rgba(179,30,124,.10); padding:3px 7px; border-radius:4px;
+  }
+  .panel .hd .ai .dt{ width:5px; height:5px; border-radius:50%; background:var(--uq-magenta); }
+  .panel .hd .actions{ margin-left:auto; display:flex; align-items:center; gap:6px; }
+  .mini-btn{
+    font-family:var(--font-display); font-weight:700; font-size:9.5px;
+    letter-spacing:.05em; color:var(--uq-text-mid);
+    background:#F8F3FB; border:1px solid #ECE4F2; border-radius:6px;
+    padding:4px 9px; cursor:pointer;
+  }
+  .mini-btn.on{ background:var(--uq-purple); color:#fff; border-color:var(--uq-purple); }
+
+  /* =========================================================================
+     VARIANCE PANEL — Computed vs Charged across domains
+     ========================================================================= */
+  .var-panel{ grid-column: 1 / 2; grid-row: 2 / 3; }
+  .var-grid{
+    display:grid; grid-template-columns:140px 1fr 90px 70px; gap:12px;
+    align-items:center; padding:5px 0;
+    border-top:1px dashed #ECE4F2;
+  }
+  .var-grid:first-of-type{ border-top:0; }
+  .var-dom{ display:flex; flex-direction:column; gap:2px; }
+  .var-dom .nm{ font-family:var(--font-display); font-weight:800; font-size:12px; color:var(--uq-dark-purple); }
+  .var-dom .ct{ font-size:9.5px; color:var(--uq-text-muted); }
+  .var-bar{
+    height:22px; background:#F4EEFA; border-radius:6px; position:relative; overflow:hidden;
+  }
+  .var-bar .charged{
+    position:absolute; left:0; top:0; bottom:0;
+    background:linear-gradient(90deg, #C9B8DC 0%, #A28BBD 100%);
+    border-radius:6px 0 0 6px;
+  }
+  .var-bar .computed{
+    position:absolute; left:0; top:0; bottom:0;
+    border-right:2px dashed var(--uq-magenta);
+  }
+  .var-bar .gap{
+    position:absolute; top:0; bottom:0;
+    background:repeating-linear-gradient(45deg, rgba(179,30,124,.22) 0 5px, rgba(179,30,124,.08) 5px 10px);
+    border-radius:0 6px 6px 0;
+  }
+  .var-amt{ font-family:var(--font-display); font-weight:800; font-size:13px; color:var(--uq-magenta); text-align:right; }
+  .var-amt small{ font-weight:700; font-size:9px; color:var(--uq-text-muted); display:block; letter-spacing:.06em; text-transform:uppercase; margin-bottom:1px; }
+  .var-pct{ font-family:var(--font-display); font-weight:800; font-size:11px; color:var(--uq-purple); text-align:right; }
+  .var-pct .arr{ color:#C03A3A; }
+
+  .var-legend{
+    margin-top:10px; padding-top:10px; border-top:1px solid #ECE4F2;
+    display:flex; align-items:center; gap:18px; font-size:10px; color:var(--uq-text-mid);
+  }
+  .var-legend .sw{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-display); font-weight:700; letter-spacing:.04em; }
+  .var-legend .sw .b1{ width:14px; height:8px; background:linear-gradient(90deg,#C9B8DC,#A28BBD); border-radius:2px; }
+  .var-legend .sw .b2{ width:14px; height:8px; background:repeating-linear-gradient(45deg, rgba(179,30,124,.45) 0 4px, rgba(179,30,124,.15) 4px 8px); border-radius:2px; }
+  .var-legend .sw .b3{ width:2px; height:10px; background:var(--uq-magenta); border-radius:1px; }
+  .var-legend .summary{
+    margin-left:auto; font-family:var(--font-display); font-weight:800;
+    font-size:11px; color:var(--uq-dark-purple);
+  }
+  .var-legend .summary b{ color:var(--uq-magenta); }
+
+  /* =========================================================================
+     LIVE AI INSIGHTS (right column, top)
+     ========================================================================= */
+  .insights-panel{ grid-column: 2 / 3; grid-row: 2 / 4; }
+  .insights-panel .hd .ai{ background:rgba(179,30,124,.12); }
+  .insights-stream{
+    display:flex; flex-direction:column; gap:8px; flex:1; min-height:0;
+    overflow:hidden;
+  }
+  .insight{
+    background:linear-gradient(180deg, #FBF6FD 0%, #fff 100%);
+    border:1px solid #ECE4F2; border-radius:10px; padding:10px 11px;
+    position:relative;
+    animation:slidein .6s ease both;
+  }
+  @keyframes slidein{
+    from{ opacity:0; transform:translateY(6px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  .insight .top{
+    display:flex; align-items:center; gap:7px; margin-bottom:5px;
+  }
+  .insight .tg{
+    font-family:var(--font-display); font-weight:800; font-size:8.5px;
+    letter-spacing:.14em; padding:2px 6px; border-radius:3px;
+    color:#fff;
+  }
+  .insight .tg.cards{ background:#B31E7C; }
+  .insight .tg.lending{ background:#492079; }
+  .insight .tg.tf{ background:#3B2162; }
+  .insight .tg.tres{ background:#C879AB; }
+  .insight .tg.tb{ background:#7A4FAD; }
+  .insight .when{
+    margin-left:auto; font-size:9px; color:var(--uq-text-muted);
+    font-family:var(--font-mono);
+  }
+  .insight .tx{
+    font-size:11px; color:var(--uq-text-dark); line-height:1.4;
+  }
+  .insight .tx b{ color:var(--uq-dark-purple); font-family:var(--font-display); font-weight:800; }
+  .insight .meta{
+    margin-top:6px; display:flex; gap:8px; align-items:center;
+    font-size:9px; color:var(--uq-text-muted); font-family:var(--font-display); font-weight:700; letter-spacing:.04em;
+  }
+  .insight .meta .delta{ color:#C03A3A; font-weight:800; }
+  .insight .meta .delta.up{ color:#1F8A5B; }
+  .insights-panel .next{
+    margin-top:auto; padding-top:10px; border-top:1px dashed #ECE4F2;
+    display:flex; align-items:center; gap:8px;
+    font-family:var(--font-display); font-weight:700; font-size:9.5px;
+    color:var(--uq-text-muted); letter-spacing:.04em;
+  }
+  .insights-panel .next .bar{
+    flex:1; height:3px; background:#ECE4F2; border-radius:2px; overflow:hidden;
+  }
+  .insights-panel .next .bar .fl{
+    height:100%; background:linear-gradient(90deg, var(--uq-magenta), var(--uq-mauve));
+    width:0; animation:fill 18s linear infinite;
+  }
+  @keyframes fill{
+    from{ width:0; } to{ width:100%; }
+  }
+
+  /* =========================================================================
+     CLUSTERS PANEL — agentic clustering per domain
+     ========================================================================= */
+  .clusters-panel{ grid-column: 1 / 2; grid-row: 3 / 4; }
+  .cluster-tabs{
+    display:flex; gap:4px; margin-bottom:10px;
+    border-bottom:1px solid #ECE4F2; padding-bottom:8px;
+  }
+  .cluster-tab{
+    font-family:var(--font-display); font-weight:700; font-size:10px;
+    padding:5px 10px; border-radius:6px; cursor:pointer;
+    color:var(--uq-text-mid); background:transparent;
+    letter-spacing:.04em; border:1px solid transparent;
+    display:inline-flex; align-items:center; gap:6px;
+  }
+  .cluster-tab .ct{
+    background:#F4EEFA; color:var(--uq-purple); border-radius:999px;
+    padding:1px 6px; font-size:9px;
+  }
+  .cluster-tab.on{
+    background:#fff; color:var(--uq-purple); border-color:#E1D9EB;
+    box-shadow:0 1px 2px rgba(73,32,121,.06);
+  }
+  .cluster-tab.on .ct{ background:var(--uq-magenta); color:#fff; }
+
+  .cluster-list{
+    display:flex; flex-direction:column; gap:6px; overflow:hidden;
+  }
+  .cluster{
+    display:grid;
+    grid-template-columns: 38px 1fr 110px 80px 70px 30px;
+    gap:10px; align-items:center;
+    padding:7px 10px; border:1px solid #F0E8F6; border-radius:9px;
+    background:#FDFCFE;
+    cursor:pointer; transition:.18s;
+  }
+  .cluster:hover{ border-color:#E0CEE9; background:#fff; box-shadow:0 2px 6px rgba(73,32,121,.06); }
+  .cluster .mt{
+    width:34px; height:34px; border-radius:8px;
+    background:linear-gradient(135deg, var(--uq-magenta), var(--uq-dark-purple));
+    color:#fff; display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:800; font-size:13px;
+    letter-spacing:-0.02em;
+  }
+  .cluster.t2 .mt{ background:linear-gradient(135deg, #C879AB, var(--uq-purple)); }
+  .cluster.t3 .mt{ background:linear-gradient(135deg, #A28BBD, var(--uq-dark-purple)); }
+  .cluster.t4 .mt{ background:linear-gradient(135deg, #7A4FAD, #492079); }
+  .cluster .body .nm{
+    font-family:var(--font-display); font-weight:800; font-size:12px; color:var(--uq-dark-purple);
+    line-height:1.15;
+  }
+  .cluster .body .ds{
+    font-size:10px; color:var(--uq-text-mid); line-height:1.35; margin-top:2px;
+  }
+  .cluster .body .ds b{ color:var(--uq-magenta); font-weight:700; }
+  .cluster .ct-pill{
+    font-family:var(--font-display); font-weight:800; font-size:10.5px;
+    color:var(--uq-purple); text-align:center;
+  }
+  .cluster .ct-pill small{ display:block; font-size:8.5px; font-weight:700; color:var(--uq-text-muted); letter-spacing:.10em; text-transform:uppercase; margin-bottom:1px; }
+  .cluster .val{ text-align:right; font-family:var(--font-display); font-weight:800; font-size:12px; color:var(--uq-magenta); }
+  .cluster .val small{ display:block; font-size:8.5px; font-weight:700; color:var(--uq-text-muted); letter-spacing:.10em; text-transform:uppercase; margin-bottom:1px; }
+  .cluster .conf{ display:flex; flex-direction:column; gap:3px; align-items:flex-end; }
+  .cluster .conf small{ font-size:8.5px; font-weight:700; color:var(--uq-text-muted); letter-spacing:.10em; text-transform:uppercase; }
+  .conf-bar{ width:60px; height:5px; background:#F0E8F6; border-radius:3px; overflow:hidden; }
+  .conf-bar .fl{ height:100%; background:linear-gradient(90deg, var(--uq-purple), var(--uq-magenta)); border-radius:3px; }
+  .cluster .arr{ color:#C9BAD8; font-family:var(--font-display); font-weight:800; font-size:14px; text-align:right; }
+  .cluster:hover .arr{ color:var(--uq-magenta); }
+
+  /* =========================================================================
+     SLA TRACKER
+     ========================================================================= */
+  .sla-panel{ grid-column: 1 / 2; grid-row: 4 / 5; }
+  .sla-row{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+  .sla-aging{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:6px;
+  }
+  .sla-bucket{
+    background:#FDFCFE; border:1px solid #F0E8F6; border-radius:9px;
+    padding:9px 10px; display:flex; flex-direction:column; gap:2px;
+    position:relative; overflow:hidden;
+  }
+  .sla-bucket::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:3px;
+    background:#1F8A5B;
+  }
+  .sla-bucket.warn::before{ background:#E5A82C; }
+  .sla-bucket.crit::before{ background:#C03A3A; }
+  .sla-bucket.brk::before{ background:var(--uq-magenta); }
+  .sla-bucket .age{
+    font-family:var(--font-display); font-weight:800; font-size:9.5px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--uq-text-muted);
+    margin-top:6px;
+  }
+  .sla-bucket .ct{
+    font-family:var(--font-display); font-weight:800; font-size:22px;
+    color:var(--uq-dark-purple); line-height:1; letter-spacing:-0.02em;
+    margin-top:2px;
+  }
+  .sla-bucket.brk .ct{ color:var(--uq-magenta); }
+  .sla-bucket .vl{ font-size:10px; color:var(--uq-text-mid); font-family:var(--font-display); font-weight:700; }
+  .sla-bucket .vl b{ color:var(--uq-dark-purple); }
+
+  .sla-breach{
+    background:#FDFCFE; border:1px solid #F0E8F6; border-radius:9px; padding:10px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .sla-breach .tt{
+    display:flex; align-items:center; gap:7px;
+    font-family:var(--font-display); font-weight:800; font-size:10px;
+    color:var(--uq-dark-purple); letter-spacing:.04em;
+  }
+  .sla-breach .tt .dot{ width:6px; height:6px; border-radius:50%; background:#C03A3A; animation:pulse-r 1.4s infinite; }
+  @keyframes pulse-r{
+    0%,100%{ box-shadow:0 0 0 0 rgba(192,58,58,.55); }
+    70%{ box-shadow:0 0 0 6px rgba(192,58,58,0); }
+  }
+  .br-item{
+    display:flex; align-items:center; gap:8px; padding:6px 0;
+    border-top:1px dashed #ECE4F2; font-size:10.5px; color:var(--uq-text-dark);
+  }
+  .br-item:first-of-type{ border-top:0; padding-top:0; }
+  .br-item .id{ font-family:var(--font-mono); font-size:10px; color:var(--uq-purple); font-weight:700; min-width:60px; }
+  .br-item .ds{ flex:1; line-height:1.3; }
+  .br-item .ds b{ color:var(--uq-dark-purple); font-family:var(--font-display); font-weight:800; }
+  .br-item .ow{
+    font-family:var(--font-display); font-weight:700; font-size:9px;
+    letter-spacing:.06em; color:var(--uq-text-muted); text-transform:uppercase;
+  }
+  .br-item .ag{
+    font-family:var(--font-display); font-weight:800; font-size:10px;
+    color:#fff; background:#C03A3A; padding:2px 6px; border-radius:4px;
+    letter-spacing:.04em;
+  }
+  .br-item .ag.warn{ background:#E5A82C; }
+
+  /* =========================================================================
+     CHAT PANEL
+     ========================================================================= */
+  .chat-panel{ grid-column: 2 / 3; grid-row: 4 / 5; }
+  .chat-body{
+    display:flex; flex-direction:column; gap:7px; flex:1; min-height:0;
+    overflow:hidden;
+  }
+  .msg{
+    border-radius:10px; padding:7px 10px; font-size:10.5px; line-height:1.4;
+    max-width:88%;
+  }
+  .msg.u{ align-self:flex-end; background:var(--uq-purple); color:#fff; border-bottom-right-radius:3px; }
+  .msg.a{ align-self:flex-start; background:#F4EEFA; color:var(--uq-text-dark); border-bottom-left-radius:3px; }
+  .msg.a b{ color:var(--uq-dark-purple); font-family:var(--font-display); font-weight:800; }
+  .msg.a .tool{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--font-display); font-weight:800; font-size:8.5px;
+    letter-spacing:.10em; text-transform:uppercase; color:var(--uq-magenta);
+    background:#fff; border:1px solid #E0CEE9; border-radius:4px;
+    padding:1px 5px; margin-right:5px;
+  }
+  .msg.a .citation{
+    display:inline-block; background:#fff; color:var(--uq-purple);
+    border:1px solid #E0CEE9; border-radius:3px;
+    padding:0 4px; font-size:8.5px; font-family:var(--font-mono);
+    margin-left:3px;
+  }
+  .typing{
+    align-self:flex-start; background:#F4EEFA; padding:6px 10px;
+    border-radius:10px; border-bottom-left-radius:3px; display:flex; gap:3px;
+  }
+  .typing .d{
+    width:5px; height:5px; border-radius:50%; background:var(--uq-mauve);
+    animation:typing 1s infinite;
+  }
+  .typing .d:nth-child(2){ animation-delay:.15s; }
+  .typing .d:nth-child(3){ animation-delay:.3s; }
+  @keyframes typing{
+    0%,60%,100%{ transform:translateY(0); opacity:.35; }
+    30%{ transform:translateY(-3px); opacity:1; }
+  }
+  .composer{
+    margin-top:8px; display:flex; gap:6px; align-items:center;
+    background:#fff; border:1px solid #E0CEE9; border-radius:10px;
+    padding:5px 5px 5px 10px;
+  }
+  .composer input{
+    flex:1; border:0; outline:0; background:transparent;
+    font-family:var(--font-body); font-size:11px; color:var(--uq-text-dark);
+    padding:5px 0;
+  }
+  .composer input::placeholder{ color:#B7A6C7; }
+  .composer .send{
+    background:linear-gradient(135deg, var(--uq-magenta), var(--uq-purple));
+    color:#fff; border:0; border-radius:7px; padding:6px 11px; cursor:pointer;
+    font-family:var(--font-display); font-weight:800; font-size:10px;
+    letter-spacing:.06em;
+  }
+  .suggestions{
+    margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;
+  }
+  .sugg{
+    font-family:var(--font-display); font-weight:700; font-size:9px;
+    color:var(--uq-purple); background:#fff; border:1px solid #E0CEE9;
+    border-radius:999px; padding:3px 8px; cursor:pointer;
+    letter-spacing:.02em;
+  }
+
+  /* =========================================================================
+     MONTH-END NARRATIVE (bottom, full-width)
+     ========================================================================= */
+  .narr-panel{ grid-column: 1 / -1; grid-row: 5 / 6; }
+  .narr-wrap{
+    display:grid; grid-template-columns: 1fr 280px; gap:14px;
+  }
+  .narr-body{
+    background:linear-gradient(180deg, #FAF5FD 0%, #fff 100%);
+    border:1px solid #ECE4F2; border-radius:10px; padding:12px 14px;
+    position:relative;
+  }
+  .narr-body::before{
+    content:""; position:absolute; left:0; top:14px; bottom:14px; width:3px;
+    background:linear-gradient(180deg, var(--uq-magenta), var(--uq-purple));
+    border-radius:0 3px 3px 0;
+  }
+  .narr-body .ph{
+    display:flex; align-items:center; gap:8px; margin-bottom:6px;
+    font-family:var(--font-display); font-weight:800; font-size:9.5px;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--uq-magenta);
+  }
+  .narr-body .ph .v{ color:var(--uq-text-muted); font-size:9px; letter-spacing:.06em; margin-left:auto; text-transform:none; }
+  .narr-body h3{
+    margin:0 0 8px; font-family:var(--font-display); font-weight:800;
+    font-size:14px; color:var(--uq-dark-purple); letter-spacing:-0.01em;
+  }
+  .narr-body p{
+    margin:0 0 7px; font-size:11px; color:var(--uq-text-dark); line-height:1.55;
+  }
+  .narr-body p:last-child{ margin-bottom:0; }
+  .narr-body b{ color:var(--uq-dark-purple); font-family:var(--font-display); font-weight:800; }
+  .narr-body .em{ color:var(--uq-magenta); font-family:var(--font-display); font-weight:800; }
+  .narr-body .cite{
+    display:inline-block; background:#fff; color:var(--uq-purple);
+    border:1px solid #E0CEE9; border-radius:3px;
+    padding:0 4px; font-size:9px; font-family:var(--font-mono);
+    margin-left:2px; vertical-align:1px;
+  }
+  .narr-body .typing-cursor{
+    display:inline-block; width:8px; height:13px; background:var(--uq-magenta);
+    vertical-align:-2px; margin-left:2px; animation:blink 1s infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .narr-side{
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .narr-stat{
+    background:#fff; border:1px solid #ECE4F2; border-radius:10px;
+    padding:9px 11px; display:flex; flex-direction:column; gap:1px;
+  }
+  .narr-stat .lb{
+    font-family:var(--font-display); font-weight:700; font-size:9px;
+    letter-spacing:.12em; text-transform:uppercase; color:var(--uq-text-muted);
+  }
+  .narr-stat .vl{
+    font-family:var(--font-display); font-weight:800; font-size:18px;
+    color:var(--uq-dark-purple); letter-spacing:-0.02em; line-height:1;
+    margin-top:3px;
+  }
+  .narr-stat .vl.acc{ color:var(--uq-magenta); }
+  .narr-stat .vl.ok{ color:#1F8A5B; }
+  .narr-stat .vl small{ font-size:11px; color:var(--uq-text-muted); margin-left:3px; font-weight:700; }
+  .narr-stat .nt{ font-size:9.5px; color:var(--uq-text-mid); margin-top:2px; line-height:1.3; }
+  .narr-actions{
+    margin-top:auto; display:flex; gap:6px;
+  }
+  .narr-actions .b{
+    flex:1; font-family:var(--font-display); font-weight:800; font-size:10px;
+    letter-spacing:.04em; padding:7px 9px; border-radius:7px; cursor:pointer;
+    text-align:center; border:1px solid;
+  }
+  .narr-actions .b.p{
+    background:linear-gradient(135deg, var(--uq-magenta), var(--uq-purple));
+    color:#fff; border-color:transparent;
+  }
+  .narr-actions .b.s{
+    background:#fff; color:var(--uq-purple); border-color:#E0CEE9;
+  }
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="canvas" id="canvas">
+
+    <!-- ===========================  TOP BAR  =========================== -->
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">UQ</div>
+        <div>
+          <div class="nm">Uniqus · Revenue Assurance</div>
+          <div class="sub">Agentic Audit Platform</div>
+        </div>
+        <div class="sep"></div>
+        <div class="crumbs">
+          <span>Audit Programs</span>
+          <span class="arr">›</span>
+          <span>Revenue Assurance</span>
+          <span class="arr">›</span>
+          <span class="here">Auditor Cockpit</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <div class="seg">
+          <button>FY26</button>
+          <button class="on">Q1 FY26</button>
+          <button>Apr 2026</button>
+          <button>This Week</button>
+        </div>
+        <div class="pill-btn">
+          <span class="cal"></span>
+          <span>All Domains</span>
+          <span class="b">5</span>
+        </div>
+        <div class="pill-btn icon"><span class="ic">⌥</span></div>
+        <div class="pill-btn icon"><span class="ic">◐</span></div>
+        <div class="user">
+          <div class="av">PM</div>
+          <div class="info">
+            <div class="nm">Priya Menon</div>
+            <div class="rl">Head of Internal Audit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===========================  CONTEXT BAR  =========================== -->
+    <div class="ctxbar">
+      <div class="ctx-title">
+        <span class="eb">Internal Audit · Revenue Assurance</span>
+        <h1>Auditor Cockpit</h1>
+      </div>
+      <div class="ctx-divider"></div>
+      <div class="ctx-stat"><span class="k">Period</span><span class="v">Apr 01 → Apr 28, 2026</span></div>
+      <div class="ctx-divider"></div>
+      <div class="ctx-stat"><span class="k">Charges under audit</span><span class="v">37 <small style="font-weight:600;color:var(--uq-text-muted)">rules</small></span></div>
+      <div class="ctx-divider"></div>
+      <div class="ctx-stat"><span class="k">Transactions analysed</span><span class="v">142.6 M</span></div>
+      <div class="ctx-divider"></div>
+      <div class="ctx-stat"><span class="k">Coverage</span><span class="v ok">98.4 %</span></div>
+      <div class="ctx-divider"></div>
+      <div class="ctx-stat"><span class="k">Last refresh</span><span class="v acc" id="refreshTime">07 sec ago</span></div>
+      <div class="right">
+        <span class="live-tag"><span class="dt"></span> Live · streaming</span>
+      </div>
+    </div>
+
+    <!-- ===========================  MAIN GRID  =========================== -->
+    <div class="main">
+
+      <!-- ------------- KPI STRIP ------------- -->
+      <div class="kpi-strip">
+        <div class="kpi dark">
+          <div class="lb">Revenue Leakage Detected</div>
+          <div><span class="vl" data-cv="42.7">₹0.0</span><span class="un">Cr</span></div>
+          <div class="ft"><span class="ch">▲ 18.4% vs Mar</span><span>YTD ₹186 Cr</span></div>
+          <svg class="spark" width="68" height="22" viewBox="0 0 68 22">
+            <polyline fill="none" stroke="#C879AB" stroke-width="1.6" points="0,18 8,15 16,16 24,12 32,13 40,9 48,11 56,6 64,4"/>
+            <polyline fill="rgba(200,121,171,.22)" stroke="none" points="0,18 8,15 16,16 24,12 32,13 40,9 48,11 56,6 64,4 64,22 0,22"/>
+          </svg>
+        </div>
+        <div class="kpi acc">
+          <div class="lb">Recovered / Adjusted</div>
+          <div><span class="vl" data-cv="27.3">₹0.0</span><span class="un">Cr</span></div>
+          <div class="ft"><span class="ch">63.9% of detected</span><span>+₹4.1 Cr this wk</span></div>
+        </div>
+        <div class="kpi warn">
+          <div class="lb">Open Exceptions</div>
+          <div><span class="vl" data-cv="2847">0</span></div>
+          <div class="ft"><span class="ch fl">↔ stable</span><span>₹15.4 Cr at risk</span></div>
+        </div>
+        <div class="kpi acc">
+          <div class="lb">SLA Compliance · 14-day</div>
+          <div><span class="vl" data-cv="87.2">0.0</span><span class="un">%</span></div>
+          <div class="ft"><span class="ch dn">▼ 3.1 pp vs target</span><span>Target 90%</span></div>
+        </div>
+        <div class="kpi">
+          <div class="lb">High-Materiality Clusters</div>
+          <div><span class="vl" data-cv="14">0</span></div>
+          <div class="ft"><span class="ch">3 new</span><span>≥ ₹1 Cr impact</span></div>
+        </div>
+        <div class="kpi ok">
+          <div class="lb">Audit Coverage</div>
+          <div><span class="vl" data-cv="98.4">0.0</span><span class="un">%</span></div>
+          <div class="ft"><span class="ch">All rules green</span><span>1 rule paused</span></div>
+        </div>
+      </div>
+
+      <!-- ------------- VARIANCE PANEL ------------- -->
+      <div class="panel var-panel">
+        <div class="hd">
+          <div class="ttl">
+            <span class="eyebrow">Variance Analysis</span>
+            <span class="panel-title">Computed vs Charged · by audit domain</span>
+          </div>
+          <div class="actions">
+            <button class="mini-btn on">Value</button>
+            <button class="mini-btn">% Variance</button>
+            <button class="mini-btn">Count</button>
+            <button class="mini-btn">Export</button>
+          </div>
+        </div>
+
+        <!-- rows; widths are % of the bar (charged + variance). All bars share a max-revenue scale. -->
+        <div class="var-grid">
+          <div class="var-dom"><span class="nm">Cards</span><span class="ct">VisionPlus · CardPro</span></div>
+          <div class="var-bar">
+            <div class="charged" style="width:62%;"></div>
+            <div class="computed" style="left:78%;"></div>
+            <div class="gap" style="left:62%; width:16%;"></div>
+          </div>
+          <div class="var-amt"><small>Variance</small>₹18.2 Cr</div>
+          <div class="var-pct"><span class="arr">▲</span> 11.3%</div>
+        </div>
+
+        <div class="var-grid">
+          <div class="var-dom"><span class="nm">Lending</span><span class="ct">Finone · LOS</span></div>
+          <div class="var-bar">
+            <div class="charged" style="width:48%;"></div>
+            <div class="computed" style="left:55%;"></div>
+            <div class="gap" style="left:48%; width:7%;"></div>
+          </div>
+          <div class="var-amt"><small>Variance</small>₹9.4 Cr</div>
+          <div class="var-pct"><span class="arr">▲</span> 6.1%</div>
+        </div>
+
+        <div class="var-grid">
+          <div class="var-dom"><span class="nm">Trade Finance</span><span class="ct">Murex · Intellect</span></div>
+          <div class="var-bar">
+            <div class="charged" style="width:34%;"></div>
+            <div class="computed" style="left:42%;"></div>
+            <div class="gap" style="left:34%; width:8%;"></div>
+          </div>
+          <div class="var-amt"><small>Variance</small>₹8.6 Cr</div>
+          <div class="var-pct"><span class="arr">▲</span> 9.8%</div>
+        </div>
+
+        <div class="var-grid">
+          <div class="var-dom"><span class="nm">Treasury</span><span class="ct">Murex FX · MM</span></div>
+          <div class="var-bar">
+            <div class="charged" style="width:24%;"></div>
+            <div class="computed" style="left:28%;"></div>
+            <div class="gap" style="left:24%; width:4%;"></div>
+          </div>
+          <div class="var-amt"><small>Variance</small>₹4.1 Cr</div>
+          <div class="var-pct"><span class="arr">▲</span> 4.2%</div>
+        </div>
+
+        <div class="var-grid">
+          <div class="var-dom"><span class="nm">Transaction Banking</span><span class="ct">Finacle · Flexcube</span></div>
+          <div class="var-bar">
+            <div class="charged" style="width:18%;"></div>
+            <div class="computed" style="left:20%;"></div>
+            <div class="gap" style="left:18%; width:2%;"></div>
+          </div>
+          <div class="var-amt"><small>Variance</small>₹2.4 Cr</div>
+          <div class="var-pct"><span class="arr">▲</span> 2.7%</div>
+        </div>
+
+        <div class="var-legend">
+          <span class="sw"><span class="b1"></span> Charged</span>
+          <span class="sw"><span class="b2"></span> Variance gap</span>
+          <span class="sw"><span class="b3"></span> Computed (rule)</span>
+          <span class="summary">Total variance · <b>₹42.7 Cr</b> across <b>5</b> domains · <b>2,847</b> exceptions</span>
+        </div>
+      </div>
+
+      <!-- ------------- LIVE AI INSIGHTS (right tall) ------------- -->
+      <div class="panel insights-panel">
+        <div class="hd">
+          <div class="ttl">
+            <span class="ai"><span class="dt"></span> Live AI Insights</span>
+            <span class="panel-title" style="margin-top:5px;">Real-time analysis for the IA Head</span>
+          </div>
+        </div>
+        <div class="insights-stream" id="insightsStream">
+          <div class="insight">
+            <div class="top">
+              <span class="tg cards">Cards</span>
+              <span class="when">2 min ago</span>
+            </div>
+            <div class="tx"><b>Cards leakage up 18%</b> month-on-month — driven by <b>annual fee not yet repriced</b> on 380 corporate cards after the Feb circular.</div>
+            <div class="meta"><span>Materiality ₹2.4 Cr</span><span>·</span><span class="delta">▲ 18.0%</span></div>
+          </div>
+          <div class="insight">
+            <div class="top">
+              <span class="tg lending">Lending</span>
+              <span class="when">9 min ago</span>
+            </div>
+            <div class="tx"><b>FX markup short-charged</b> on 412 cross-border swift transfers — system using spot rate instead of TT rate per policy <b>FX-2024-07</b>.</div>
+            <div class="meta"><span>Materiality ₹1.8 Cr</span><span>·</span><span class="delta">▲ 24.5%</span></div>
+          </div>
+          <div class="insight">
+            <div class="top">
+              <span class="tg tf">Trade Finance</span>
+              <span class="when">23 min ago</span>
+            </div>
+            <div class="tx"><b>LC commission band miscalculated</b> on facilities above ₹50 Cr — slab cap applied a tier early. Recovery routed to <b>P. Iyer</b>.</div>
+            <div class="meta"><span>Materiality ₹3.1 Cr</span><span>·</span><span class="delta up">▼ 4.2%</span></div>
+          </div>
+          <div class="insight">
+            <div class="top">
+              <span class="tg tres">Treasury</span>
+              <span class="when">41 min ago</span>
+            </div>
+            <div class="tx"><b>NDF book reconciled clean</b> for week ending Apr 26 — variance below ₹0.05 Cr threshold for 7 consecutive days.</div>
+            <div class="meta"><span>Materiality &lt; ₹0.1 Cr</span><span>·</span><span class="delta up">All green</span></div>
+          </div>
+        </div>
+        <div class="next">
+          <span>Next refresh</span>
+          <span class="bar"><span class="fl"></span></span>
+          <span>4:32</span>
+        </div>
+      </div>
+
+      <!-- ------------- CLUSTERS PANEL ------------- -->
+      <div class="panel clusters-panel">
+        <div class="hd">
+          <div class="ttl">
+            <span class="ai"><span class="dt"></span> Agentic Clustering</span>
+            <span class="panel-title" style="margin-top:5px;">Root-cause clusters — ranked by materiality</span>
+          </div>
+          <div class="actions">
+            <span class="eyebrow mute">Sort</span>
+            <button class="mini-btn on">Impact</button>
+            <button class="mini-btn">Confidence</button>
+            <button class="mini-btn">Age</button>
+          </div>
+        </div>
+
+        <div class="cluster-tabs">
+          <div class="cluster-tab on">All domains <span class="ct">14</span></div>
+          <div class="cluster-tab">Cards <span class="ct">5</span></div>
+          <div class="cluster-tab">Lending <span class="ct">3</span></div>
+          <div class="cluster-tab">Trade Finance <span class="ct">3</span></div>
+          <div class="cluster-tab">Treasury <span class="ct">2</span></div>
+          <div class="cluster-tab">Transaction Banking <span class="ct">1</span></div>
+        </div>
+
+        <div class="cluster-list">
+          <div class="cluster">
+            <div class="mt">A1</div>
+            <div class="body">
+              <div class="nm">Cards · Annual fee at old rate (Feb-2026 repricing miss)</div>
+              <div class="ds">380 corporate cards · fee charged ₹2,500 vs computed ₹3,500 · root cause: <b>billing engine config not migrated to circular FY26-09</b></div>
+            </div>
+            <div class="ct-pill"><small>Exceptions</small>380</div>
+            <div class="val"><small>Impact</small>₹2.40 Cr</div>
+            <div class="conf"><small>Confidence</small><div class="conf-bar"><div class="fl" style="width:96%;"></div></div></div>
+            <div class="arr">›</div>
+          </div>
+
+          <div class="cluster t2">
+            <div class="mt">A2</div>
+            <div class="body">
+              <div class="nm">Trade Finance · LC commission slab cap applied a tier early</div>
+              <div class="ds">62 LCs &gt; ₹50 Cr · short charge avg 0.18% · root cause: <b>rate-card lookup truncating tier at ₹49.99 Cr</b></div>
+            </div>
+            <div class="ct-pill"><small>Exceptions</small>62</div>
+            <div class="val"><small>Impact</small>₹3.10 Cr</div>
+            <div class="conf"><small>Confidence</small><div class="conf-bar"><div class="fl" style="width:91%;"></div></div></div>
+            <div class="arr">›</div>
+          </div>
+
+          <div class="cluster t3">
+            <div class="mt">A3</div>
+            <div class="body">
+              <div class="nm">Lending · FX markup using spot instead of TT rate</div>
+              <div class="ds">412 cross-border swifts in Apr · avg under-charge ₹4,300 · root cause: <b>SWIFT charge rule reading mid-rate, policy FX-2024-07 specifies TT</b></div>
+            </div>
+            <div class="ct-pill"><small>Exceptions</small>412</div>
+            <div class="val"><small>Impact</small>₹1.80 Cr</div>
+            <div class="conf"><small>Confidence</small><div class="conf-bar"><div class="fl" style="width:88%;"></div></div></div>
+            <div class="arr">›</div>
+          </div>
+
+          <div class="cluster t4">
+            <div class="mt">A4</div>
+            <div class="body">
+              <div class="nm">Cards · FX markup not applied on cross-border POS &lt; ₹10K</div>
+              <div class="ds">2,140 small-ticket POS · 3.5% markup waived in error · root cause: <b>legacy threshold from FY22 still hard-coded in VisionPlus</b></div>
+            </div>
+            <div class="ct-pill"><small>Exceptions</small>2,140</div>
+            <div class="val"><small>Impact</small>₹1.42 Cr</div>
+            <div class="conf"><small>Confidence</small><div class="conf-bar"><div class="fl" style="width:82%;"></div></div></div>
+            <div class="arr">›</div>
+          </div>
+
+          <div class="cluster">
+            <div class="mt">A5</div>
+            <div class="body">
+              <div class="nm">Treasury · NDF reset-day pricing using next-day fix</div>
+              <div class="ds">28 NDF deals · off-by-one settlement date · root cause: <b>calendar mapping skipping Mumbai holiday on Apr 14</b></div>
+            </div>
+            <div class="ct-pill"><small>Exceptions</small>28</div>
+            <div class="val"><small>Impact</small>₹0.94 Cr</div>
+            <div class="conf"><small>Confidence</small><div class="conf-bar"><div class="fl" style="width:78%;"></div></div></div>
+            <div class="arr">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ------------- SLA PANEL ------------- -->
+      <div class="panel sla-panel">
+        <div class="hd">
+          <div class="ttl">
+            <span class="eyebrow">SLA Tracking</span>
+            <span class="panel-title">Open exceptions · pending analysis</span>
+          </div>
+          <div class="actions">
+            <button class="mini-btn on">Aging</button>
+            <button class="mini-btn">Owner</button>
+            <button class="mini-btn">Domain</button>
+          </div>
+        </div>
+
+        <div class="sla-row">
+          <div class="sla-aging">
+            <div class="sla-bucket">
+              <span class="age">0 – 3 d</span>
+              <span class="ct">1,284</span>
+              <span class="vl">₹6.8 <b>Cr</b> · in SLA</span>
+            </div>
+            <div class="sla-bucket warn">
+              <span class="age">4 – 7 d</span>
+              <span class="ct">982</span>
+              <span class="vl">₹4.2 <b>Cr</b> · watch</span>
+            </div>
+            <div class="sla-bucket crit">
+              <span class="age">8 – 14 d</span>
+              <span class="ct">468</span>
+              <span class="vl">₹3.1 <b>Cr</b> · near breach</span>
+            </div>
+            <div class="sla-bucket brk">
+              <span class="age">&gt; 14 d</span>
+              <span class="ct">113</span>
+              <span class="vl">₹1.3 <b>Cr</b> · breached</span>
+            </div>
+          </div>
+
+          <div class="sla-breach">
+            <div class="tt"><span class="dot"></span> Imminent breaches · escalate today</div>
+            <div class="br-item">
+              <span class="id">EXC-8841</span>
+              <span class="ds"><b>Cards</b> · Annual fee miss · awaiting Product Owner sign-off</span>
+              <span class="ow">R. Shah</span>
+              <span class="ag">13d</span>
+            </div>
+            <div class="br-item">
+              <span class="id">EXC-8729</span>
+              <span class="ds"><b>Trade Fin.</b> · LC slab dispute · clarification requested</span>
+              <span class="ow">P. Iyer</span>
+              <span class="ag">12d</span>
+            </div>
+            <div class="br-item">
+              <span class="id">EXC-8702</span>
+              <span class="ds"><b>Lending</b> · Processing fee waiver outside policy</span>
+              <span class="ow">M. Khan</span>
+              <span class="ag warn">10d</span>
+            </div>
+            <div class="br-item">
+              <span class="id">EXC-8688</span>
+              <span class="ds"><b>Treasury</b> · NDF reset variance · ops review</span>
+              <span class="ow">S. Rao</span>
+              <span class="ag warn">9d</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ------------- CHAT PANEL (right bottom) ------------- -->
+      <div class="panel chat-panel">
+        <div class="hd">
+          <div class="ttl">
+            <span class="ai"><span class="dt"></span> Dashboard Chat</span>
+            <span class="panel-title" style="margin-top:5px;">Ask the cockpit anything</span>
+          </div>
+        </div>
+
+        <div class="chat-body" id="chatBody">
+          <div class="msg u">Why is the Cards backlog growing?</div>
+          <div class="msg a">
+            <span class="tool">Tool · variance.query</span>
+            <span class="tool">Tool · cluster.lookup</span>
+            <br>
+            <b>Cards open exceptions</b> are up <b>+312 wk-on-wk</b>. Driver is cluster <b>A1 — annual fee at old rate</b> (380 cards, ₹2.4 Cr).
+            Repricing config for circular FY26-09 hasn't been promoted in VisionPlus prod.
+            <span class="citation">A1</span><span class="citation">FY26-09</span>
+          </div>
+          <div class="msg u">Who owns it and what's the SLA?</div>
+          <div class="typing" id="typing"><span class="d"></span><span class="d"></span><span class="d"></span></div>
+        </div>
+
+        <div class="composer">
+          <input placeholder="Show me Trade Finance exceptions &gt; ₹50L this month…">
+          <button class="send">Ask ↵</button>
+        </div>
+        <div class="suggestions">
+          <span class="sugg">Top 5 leakage drivers</span>
+          <span class="sugg">Recovery rate by domain</span>
+          <span class="sugg">SLA breaches today</span>
+        </div>
+      </div>
+
+      <!-- ------------- MONTH-END NARRATIVE ------------- -->
+      <div class="panel narr-panel">
+        <div class="hd">
+          <div class="ttl">
+            <span class="ai"><span class="dt"></span> Month-End Narrative</span>
+            <span class="panel-title" style="margin-top:5px;">Executive Revenue Assurance report — drafted live</span>
+          </div>
+          <div class="actions">
+            <span class="eyebrow mute" style="margin-right:6px;">Drafted by Narrative agent · 3 min ago</span>
+            <button class="mini-btn">Regenerate</button>
+            <button class="mini-btn on">Edit</button>
+            <button class="mini-btn">Send to Audit Committee</button>
+          </div>
+        </div>
+
+        <div class="narr-wrap">
+          <div class="narr-body">
+            <div class="ph">
+              <span>Section · Executive summary</span>
+              <span class="v">v3 · 92% confidence · 14 citations</span>
+            </div>
+            <h3>April 2026 · Revenue Assurance — Executive summary</h3>
+            <p>
+              Across <b>5 audit domains</b> and <b>142.6 M transactions</b>, the platform detected <span class="em">₹42.7 Cr of revenue leakage</span> in April<span class="cite">var-Apr</span>, of which <b>₹27.3 Cr (63.9%)</b> has been adjusted or recovered in-month<span class="cite">GL-rec</span>.
+              <b>Cards</b> and <b>Trade Finance</b> remain the two highest-impact domains, together accounting for <b>62.7%</b> of detected variance<span class="cite">var-mix</span>.
+            </p>
+            <p>
+              Three clusters concentrate <b>71% of materiality</b>: the <b>Cards annual-fee repricing miss</b> (₹2.4 Cr, 380 accounts)<span class="cite">A1</span>, the <b>LC commission slab cap</b> error (₹3.1 Cr, 62 facilities)<span class="cite">A2</span>, and <b>FX markup on cross-border SWIFT</b> using spot in place of TT rate (₹1.8 Cr, 412 transfers)<span class="cite">A3</span>. Owners are notified and SLA timers are running; the <b>Cards cluster</b> is the only one with a breached aging&nbsp;item<span class="cite">EXC-8841</span><span class="typing-cursor"></span>
+            </p>
+          </div>
+
+          <div class="narr-side">
+            <div class="narr-stat">
+              <span class="lb">Recovery rate · Apr</span>
+              <span class="vl ok">63.9 <small>%</small></span>
+              <span class="nt">Target 60% · +3.9 pp</span>
+            </div>
+            <div class="narr-stat">
+              <span class="lb">New rules deployed</span>
+              <span class="vl">7</span>
+              <span class="nt">3 Rule-Author drafts under review</span>
+            </div>
+            <div class="narr-stat">
+              <span class="lb">Estimated Q1 leakage</span>
+              <span class="vl acc">₹118 <small>Cr</small></span>
+              <span class="nt">Linear forecast · 92% CI ±₹6 Cr</span>
+            </div>
+            <div class="narr-actions">
+              <div class="b s">Preview PDF</div>
+              <div class="b p">Approve draft</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  /* =========================================================================
+     SCALING — fit canvas to viewport while keeping 1440×980 design ratio
+     ========================================================================= */
+  (function(){
+    const canvas = document.getElementById('canvas');
+    const W = 1440, H = 1120;
+    function fit(){
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const s = Math.min(vw / W, vh / H);
+      canvas.style.transform = 'scale(' + s + ')';
+    }
+    fit();
+    window.addEventListener('resize', fit);
+  })();
+
+  /* =========================================================================
+     KPI COUNTER ANIMATION
+     ========================================================================= */
+  (function(){
+    const els = document.querySelectorAll('[data-cv]');
+    els.forEach(el => {
+      const target = parseFloat(el.dataset.cv);
+      const isInt = Number.isInteger(target);
+      const prefix = (el.textContent.match(/^[^\d]+/) || [''])[0];
+      const dur = 1100;
+      const t0 = performance.now();
+      function tick(t){
+        const k = Math.min(1, (t - t0) / dur);
+        const e = 1 - Math.pow(1 - k, 3);
+        const v = target * e;
+        el.textContent = prefix + (isInt ? Math.round(v).toLocaleString('en-IN') : v.toFixed(1));
+        if(k < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  })();
+
+  /* =========================================================================
+     LIVE REFRESH TIMESTAMP
+     ========================================================================= */
+  (function(){
+    const el = document.getElementById('refreshTime');
+    let s = 7;
+    setInterval(() => {
+      s = (s + 1) % 120;
+      const txt = s < 60 ? (s.toString().padStart(2,'0') + ' sec ago') : Math.floor(s/60) + ' min ' + (s%60).toString().padStart(2,'0') + ' sec ago';
+      el.textContent = txt;
+    }, 1000);
+  })();
+
+  /* =========================================================================
+     CHAT TYPING → REPLY CYCLE
+     ========================================================================= */
+  (function(){
+    const body = document.getElementById('chatBody');
+    const typing = document.getElementById('typing');
+    setTimeout(() => {
+      typing.remove();
+      const reply = document.createElement('div');
+      reply.className = 'msg a';
+      reply.innerHTML = '<span class="tool">Tool · sla.lookup</span><span class="tool">Tool · owner.fetch</span><br>' +
+        'Owner is <b>R. Shah · Cards Product</b>. SLA target <b>14 days</b>; the oldest item <b>EXC-8841</b> is now <b>13 d</b> — breach in <b>23 hours</b>. Remediation agent has drafted an escalation email to the Cards CFO partner, awaiting your approval.' +
+        '<span class="citation">EXC-8841</span><span class="citation">SLA-pol</span>';
+      body.appendChild(reply);
+    }, 2200);
+  })();
+
+  /* =========================================================================
+     INSIGHTS ROTATION — periodically push a new card to the top
+     ========================================================================= */
+  (function(){
+    const pool = [
+      { tag:'cards', label:'Cards', when:'just now', html:'<b>New cluster forming</b> — 240 international ATM withdrawals charged without per-use fee · likely <b>BIN-range mis-config</b>.', meta:'Materiality ₹0.6 Cr', delta:'▲ new', up:false },
+      { tag:'tres',  label:'Treasury', when:'just now', html:'<b>NDF reset pricing variance</b> opened on 28 deals · off-by-one settlement date around the <b>Mumbai holiday Apr&nbsp;14</b>.', meta:'Materiality ₹0.9 Cr', delta:'▲ 4.2%', up:false },
+      { tag:'tb',    label:'Txn Banking', when:'just now', html:'<b>Wire fee parity restored</b> — variance back below ₹0.05 Cr threshold after rule patch <b>RA-1124</b>.', meta:'Materiality &lt; ₹0.1 Cr', delta:'▼ closed', up:true },
+      { tag:'lending', label:'Lending', when:'just now', html:'<b>Processing fee waiver review</b> — 31 sanctions show waivers outside the <b>5% manager discretion</b> policy band.', meta:'Materiality ₹0.7 Cr', delta:'▲ 12.0%', up:false }
+    ];
+    let i = 0;
+    const stream = document.getElementById('insightsStream');
+    setInterval(() => {
+      const p = pool[i % pool.length]; i++;
+      const div = document.createElement('div');
+      div.className = 'insight';
+      div.innerHTML =
+        '<div class="top"><span class="tg ' + p.tag + '">' + p.label + '</span><span class="when">' + p.when + '</span></div>' +
+        '<div class="tx">' + p.html + '</div>' +
+        '<div class="meta"><span>' + p.meta + '</span><span>·</span><span class="delta ' + (p.up?'up':'') + '">' + p.delta + '</span></div>';
+      stream.insertBefore(div, stream.firstChild);
+      while(stream.children.length > 4) stream.removeChild(stream.lastChild);
+      // bump older timestamps
+      const whens = stream.querySelectorAll('.insight .when');
+      whens.forEach((w, idx) => {
+        if(idx === 0) return;
+        if(w.dataset.bumped) return;
+        const map = ['just now','3 min ago','11 min ago','25 min ago','44 min ago'];
+        w.textContent = map[idx] || w.textContent;
+      });
+    }, 9000);
+  })();
+</script>
+</body>
+</html>
