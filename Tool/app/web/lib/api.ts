@@ -36,10 +36,6 @@ export const endpoints = {
   catalogue: (id: number) => `${DF(id)}/catalogue`,
   signoffQueue: (id: number) => `${DF(id)}/signoff-queue`,
   dfDrilldown: (id: number, code: string) => `${DF(id)}/drilldown/${code}`,
-  dlEdit: (id: number) => `${DF(id)}/edit`,
-  dlClearOverride: (id: number) => `${DF(id)}/clear-override`,
-  dlFreeze: (id: number) => `${DF(id)}/freeze`,
-  dlReopen: (id: number) => `${DF(id)}/reopen`,
   dlSubmit: (id: number) => `${DF(id)}/submit`,
   dlApprove: (id: number) => `${DF(id)}/approve`,
   dlReject: (id: number) => `${DF(id)}/reject`,
@@ -60,6 +56,7 @@ export const endpoints = {
   narratives: (id: number) => `/instances/${id}/narratives`,
   circulars: (id: number) => `/instances/${id}/circulars`,
   dq: (id: number) => `/instances/${id}/dq`,
+  dqRun: (id: number) => `/instances/${id}/dq/run`,
   audit: (id: number) => `/instances/${id}/audit`,
   inputs: (id: number) => `/instances/${id}/inputs`,
 };
@@ -93,13 +90,13 @@ export type PlatformOverview = {
   packs: Pack[];
   instances: { id: number; pack: string; period_label: string; period_end: string; bank_name: string; status: string; report_status: string; buffer_status: string | null; failing_rules: number; blocking_domains: string[]; open_remediations: number; data_readiness: number; report_readiness: number }[];
 };
-export type ElementStatus = "draft" | "edited" | "frozen" | "submitted" | "certified" | "rejected" | "invalidated";
+export type ElementStatus = "draft" | "submitted" | "certified" | "rejected" | "invalidated";
 export type DataElement = {
   element_code: string; label: string; sheet_name: string; section: string;
   domain: string; business_meaning: string; source_system: string; source_code: string;
   source_field: string; source_type: string;
-  raw_value: number; override_value: number | null; value: number;
-  status: ElementStatus; editable: boolean; has_override: boolean;
+  raw_value: number; value: number;
+  status: ElementStatus; can_submit: boolean;
   last_updated_by: string; last_approved_by: string | null;
   dependent_packs: string[]; dependent_schedules: string[];
 };
@@ -111,4 +108,4 @@ export type ReportStatus = { report_status: string; metrics: Metrics | null; fla
 export type ScheduleDetail = { key: string; lines: (Line & { business_meaning: string; computation: string })[]; totals: Record<string, number>; values: Record<string, number>; available: boolean };
 export type ExceptionProposal = { id: number; element_code: string; current_value: number; proposed_value: number; rationale: string; status: string; maker_rationale: string; checker: string | null; checker_comment: string };
 export type ExceptionItem = { rule_code: string; issue: string; impacted_schedule: string; impacted_elements: string[]; remediation_hint: string; ai_root_cause: string; ai_recommendation: string; proposal: ExceptionProposal | null };
-export type Drilldown = { element_code: string; label: string; business_meaning: string; source: { source_name: string; source_field: string }; raw_value: number | null; override_value: number | null; effective_value: number; processed_value: number | null; rule: RuleRow; steps: { step: string; detail: string; value: number | null }[]; domain: string; status: string; lineage_upstream: string[] };
+export type Drilldown = { element_code: string; label: string; business_meaning: string; source: { source_name: string; source_field: string }; raw_value: number | null; effective_value: number; processed_value: number | null; rule: RuleRow; steps: { step: string; detail: string; value: number | null }[]; domain: string; status: string; lineage_upstream: string[] };

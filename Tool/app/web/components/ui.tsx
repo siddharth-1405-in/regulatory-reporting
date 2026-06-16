@@ -1,5 +1,7 @@
 "use client";
 import clsx from "clsx";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 export function Panel({ title, eyebrow, actions, children, className }: {
   title?: string; eyebrow?: string; actions?: React.ReactNode;
@@ -64,6 +66,23 @@ const ELEMENT_STATUS: Record<string, { label: string; cls: string }> = {
 export function StatusPill({ status }: { status: string }) {
   const s = ELEMENT_STATUS[status] ?? { label: status, cls: "bg-uq-alt-light text-uq-mid" };
   return <span className={clsx("chip", s.cls)}>{s.label}</span>;
+}
+
+export function NavTile({ href, icon, title, desc }: {
+  href: string; icon: React.ReactNode; title: string; desc: string;
+}) {
+  return (
+    <Link href={href}
+      className="panel p-3.5 flex items-center gap-3 hover:border-uq-magenta hover:shadow-soft transition group">
+      <span className="grid place-items-center w-10 h-10 rounded-row bg-uq-symbol text-white shrink-0">{icon}</span>
+      <span className="min-w-0">
+        <span className="flex items-center gap-1.5 font-display font-extrabold text-[14px] text-uq-dark-purple tracking-tight">
+          {title}<ChevronRight className="w-3.5 h-3.5 text-uq-magenta group-hover:translate-x-0.5 transition" strokeWidth={2.5} />
+        </span>
+        <span className="block text-[11px] text-uq-muted leading-snug">{desc}</span>
+      </span>
+    </Link>
+  );
 }
 
 export function Stat({ label, value, sub, tone }: {

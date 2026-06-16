@@ -6,10 +6,14 @@ and ROLLS UP into the existing Finance/Risk domain certification, which remains
 the calculation gate (see certification_service). Agents and the engine are
 untouched.
 
-Element status lifecycle:
-    draft → edited → frozen → submitted → certified
-                                submitted → rejected → (edited)
-    certified → invalidated   (when an approved value later changes)
+Element status lifecycle (attestation only — values are never overwritten here):
+    draft (ready for submission) → submitted → certified
+                                   submitted → rejected
+    certified | submitted → invalidated   (when upstream data later changes)
+    rejected | invalidated → submitted    (re-submit after an upstream fix)
+
+Corrections flow through re-ingestion (ingestion_service) or rule-parameter edits
+(rules_service), never through manual value overrides.
 """
 from __future__ import annotations
 
@@ -28,8 +32,9 @@ from . import (
     ownership_service, report_instance_service,
 )
 
-EDITABLE_STATES = {"draft", "edited", "rejected", "invalidated"}
-LOCKED_STATES = {"frozen", "submitted", "certified"}
+# states a Maker may submit from (everything not locked under review/certified)
+SUBMITTABLE_STATES = {"draft", "rejected", "invalidated"}
+LOCKED_STATES = {"submitted", "certified"}
 
 
 class RolePermissionError(PermissionError):
@@ -125,7 +130,6 @@ def catalogue(db: Session, instance_id: int) -> list[dict]:
     for e in reg.INPUT_ELEMENTS:
         g = gov.get(e.element_code)
         status = g.status if g else "draft"
-        override = float(g.override_value) if g and g.override_value is not None else None
         src = sources_reg.source_for(e.element_code)
         out.append({
             "element_code": e.element_code, "label": e.label, "sheet_name": e.sheet_name,
@@ -134,9 +138,8 @@ def catalogue(db: Session, instance_id: int) -> list[dict]:
             "source_system": src["source_name"], "source_code": src["source_code"],
             "source_field": src["source_field"], "source_type": e.source_type,
             "raw_value": float(raw.get(e.element_code, Decimal("0"))),
-            "override_value": override,
             "value": float(effective.get(e.element_code, Decimal("0"))),
-            "status": status, "editable": status in EDITABLE_STATES, "has_override": override is not None,
+            "status": status, "can_submit": status in SUBMITTABLE_STATES,
             "last_updated_by": g.last_updated_by if g else "system",
             "last_approved_by": g.approved_by if g else None,
             "dependent_packs": ["CAR-SA-01"],
@@ -170,51 +173,14 @@ def status_summary(db: Session, instance_id: int) -> dict[str, int]:
     return summary
 
 
-# ---- maker actions ----------------------------------------------------------
-def edit_value(db: Session, *, instance_id: int, element_code: str, value: float,
-               role: str, actor: str, reason: str = "Manual override") -> ElementGovernance:
-    """Governed manual override. The raw system value (ElementValue) is preserved;
-    the override is what the engine uses. Always re-enters maker-checker and
-    invalidates the owning domain certification."""
-    _require(role, {"Maker", "Admin"}, "edit data values")
-    r = _row(db, instance_id, element_code)
-    if r.status in LOCKED_STATES:
-        raise RolePermissionError(f"Element is {r.status}; reopen before editing.")
-    r.override_value = Decimal(str(value))
-    r.override_reason = reason
-    r.status = "edited"
-    r.last_updated_by = actor
-    r.last_updated_at = _now()
-    db.flush()
-    # value changed -> invalidate the owning domain certification (gate closes)
-    certification_service.invalidate_for_elements(db, instance_id, [element_code], actor=actor)
-    audit_service.log(db, actor=actor, action="override_value", entity_type="element_governance",
-                      entity_id=element_code, instance_id=instance_id,
-                      after={"override": float(value), "reason": reason})
-    return r
-
-
-def clear_override(db: Session, *, instance_id: int, element_code: str, role: str, actor: str):
-    _require(role, {"Maker", "Admin"}, "clear overrides")
-    r = _row(db, instance_id, element_code)
-    if r.status in LOCKED_STATES:
-        raise RolePermissionError(f"Element is {r.status}; reopen first.")
-    r.override_value = None
-    r.override_reason = ""
-    r.status = "edited"
-    db.flush()
-    certification_service.invalidate_for_elements(db, instance_id, [element_code], actor=actor)
-    return r
-
-
+# ---- read: lineage ----------------------------------------------------------
 def drilldown(db: Session, instance_id: int, code: str) -> dict:
-    """Raw → transformation → processed lineage for one governed element."""
+    """Source → transformation → processed lineage for one report-ready element."""
     e = reg.REGISTRY.get(code)
     raw = report_instance_service.load_raw_inputs(db, instance_id).get(code)
     g = (db.query(ElementGovernance).filter(ElementGovernance.instance_id == instance_id,
                                             ElementGovernance.element_code == code).one_or_none())
-    override = float(g.override_value) if g and g.override_value is not None else None
-    effective = override if override is not None else (float(raw) if raw is not None else 0.0)
+    effective = float(raw) if raw is not None else 0.0
     src = sources_reg.source_for(code)
     rule = rules_reg.rule_for(code)
 
@@ -233,9 +199,6 @@ def drilldown(db: Session, instance_id: int, code: str) -> dict:
 
     steps = [{"step": "Source extract", "detail": f"{src['source_name']} · {src['source_field']}",
               "value": float(raw) if raw is not None else None}]
-    if override is not None:
-        steps.append({"step": "Manual override", "detail": g.override_reason or "Governed override",
-                      "value": override})
     steps.append({"step": rule.get("rule_name", "Rule"), "detail": rule.get("plain_english", ""),
                   "value": contribution})
 
@@ -243,7 +206,7 @@ def drilldown(db: Session, instance_id: int, code: str) -> dict:
         "element_code": code, "label": e.label if e else code,
         "business_meaning": rules_reg.business_meaning(code),
         "source": src, "raw_value": float(raw) if raw is not None else None,
-        "override_value": override, "effective_value": effective,
+        "effective_value": effective,
         "processed_value": contribution, "rule": rule,
         "steps": steps,
         "domain": e.source_domain if e else None, "status": g.status if g else "draft",
@@ -273,40 +236,11 @@ def _bulk_set(db: Session, instance_id: int, codes: list[str], role: str, actor:
     return changed
 
 
-def freeze(db, instance_id, codes, role, actor):
-    return _bulk_set(db, instance_id, codes, role, actor, {"Maker", "Admin"},
-                     {"draft", "edited"}, "frozen", "freeze values")
-
-
-def reopen(db: Session, instance_id: int, codes: list[str], role: str, actor: str) -> list[str]:
-    """Pull values back to 'edited' for amendment. Reopening a certified or
-    submitted value invalidates the owning domain certification (a controlled
-    recall of approved data — the spec's invalidation requirement)."""
-    _require(role, {"Maker", "Admin"}, "reopen values")
-    changed, recall_domains = [], set()
-    for code in codes:
-        r = _row(db, instance_id, code)
-        if r.status in ("frozen", "submitted", "certified", "rejected", "invalidated"):
-            if r.status in ("submitted", "certified"):
-                d = ownership_service.domain_for_element(code)
-                if d:
-                    recall_domains.add(d)
-            r.status = "edited"
-            r.last_updated_by = actor
-            r.last_updated_at = _now()
-            changed.append(code)
-    for domain in recall_domains:
-        certification_service.set_status(db, instance_id, domain, "Invalidated",
-                                         actor=actor, reason="Certified data reopened for amendment")
-    db.flush()
-    audit_service.log(db, actor=actor, action="reopen_values", entity_type="element_governance",
-                      instance_id=instance_id, after={"elements": changed, "recalled_domains": list(recall_domains)})
-    return changed
-
-
 def submit(db, instance_id, codes, role, actor):
+    """Maker submits report-ready elements for Checker sign-off. Allowed from any
+    non-locked state (ready/rejected/invalidated) — no separate freeze step."""
     return _bulk_set(db, instance_id, codes, role, actor, {"Maker", "Admin"},
-                     {"frozen"}, "submitted", "submit values for sign-off")
+                     SUBMITTABLE_STATES, "submitted", "submit values for sign-off")
 
 
 # ---- checker actions --------------------------------------------------------

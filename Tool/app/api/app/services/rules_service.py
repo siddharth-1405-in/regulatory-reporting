@@ -2,8 +2,8 @@
 
 Reads effective rule parameters (registry defaults + config_service overrides),
 renders the plain-English rule and machine structure, and tags provenance
-(system / user-edited / override). Editing a rule persists a parameter override
-and triggers auto-recompute.
+(system / user-edited). Editing a rule persists a parameter override and triggers
+auto-recompute.
 """
 from __future__ import annotations
 
@@ -11,7 +11,6 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from ..models import ElementGovernance
 from ..registry.car_sa01 import elements as reg
 from ..registry.car_sa01 import rules as rules_reg
 from . import audit_service, calc_service, config_service
@@ -25,10 +24,6 @@ def _effective_params(db: Session) -> dict[str, Decimal]:
 
 def list_rules(db: Session, instance_id: int) -> list[dict]:
     params = _effective_params(db)
-    overrides = {g.element_code for g in
-                 db.query(ElementGovernance)
-                 .filter(ElementGovernance.instance_id == instance_id,
-                         ElementGovernance.override_value.isnot(None)).all()}
     out = []
     for e in reg.INPUT_ELEMENTS:
         rw = params.get(f"{e.element_code}.risk_weight")
@@ -41,7 +36,7 @@ def list_rules(db: Session, instance_id: int) -> list[dict]:
         edited = any(k in params for k in
                      (f"{e.element_code}.risk_weight", f"{e.element_code}.ccf",
                       f"{e.element_code}.charge_rate", f"{rules_reg._base_line(e.element_code)}.beta"))
-        tag = "override" if e.element_code in overrides else ("user-edited" if edited else "system")
+        tag = "user-edited" if edited else "system"
         out.append({
             "element_code": e.element_code, "label": e.label, "sheet_name": e.sheet_name,
             "domain": e.source_domain, **rule, "tag": tag,

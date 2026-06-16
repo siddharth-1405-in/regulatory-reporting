@@ -6,7 +6,7 @@ import { Badge, Button, Panel } from "@/components/ui";
 import { api, endpoints, type RuleRow } from "@/lib/api";
 
 const SHEETS = ["All", "Schedule 1", "Schedule 2", "Schedule 3", "Schedule 4"];
-const tagTone: Record<string, any> = { system: "neutral", "user-edited": "magenta", override: "warn" };
+const tagTone: Record<string, any> = { system: "neutral", "user-edited": "magenta" };
 
 export function RuleEngine({ id }: { id: number }) {
   const qc = useQueryClient();
@@ -27,7 +27,7 @@ export function RuleEngine({ id }: { id: number }) {
   return (
     <Panel eyebrow="Transformation logic" title="Rule engine"
       actions={<div className="flex gap-1">{SHEETS.map((s) => <button key={s} onClick={() => setSheet(s)} className={`chip ${sheet === s ? "bg-uq-purple text-white" : "bg-uq-alt-light text-uq-mid"}`}>{s.replace("Schedule ", "S")}</button>)}</div>}>
-      <p className="text-[11px] text-uq-muted mb-2">Plain-English rules over canonical elements. Editing a parameter persists an override and {`auto-recomputes`} the draft. {canEdit ? "" : "Switch to Maker to edit."}</p>
+      <p className="text-[11px] text-uq-muted mb-2">Plain-English transformation rules over the report inputs. Editing a parameter automatically recalculates the downstream report-ready data elements — no sign-off applies to rules themselves. {canEdit ? "" : "Switch to Maker to edit."}</p>
       <div className="overflow-auto max-h-[560px] border border-uq-border rounded-row">
         <table className="w-full text-[11px]">
           <thead className="sticky top-0 bg-uq-near-white"><tr className="text-left text-uq-purple">

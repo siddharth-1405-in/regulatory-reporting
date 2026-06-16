@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
-from ..models import ElementGovernance, ElementValue, ReportInstance, ReportPack
+from ..models import ElementValue, ReportInstance, ReportPack
 from . import audit_service
 
 STATUS_ORDER = [
@@ -69,12 +69,7 @@ def load_raw_inputs(db: Session, instance_id: int) -> dict[str, Decimal]:
 
 
 def load_inputs(db: Session, instance_id: int) -> dict[str, Decimal]:
-    """Effective input per element — a governed override takes precedence over
-    the raw system value (the engine always uses the effective value)."""
-    values = load_raw_inputs(db, instance_id)
-    overrides = (db.query(ElementGovernance)
-                 .filter(ElementGovernance.instance_id == instance_id,
-                         ElementGovernance.override_value.isnot(None)).all())
-    for g in overrides:
-        values[g.element_code] = Decimal(str(g.override_value))
-    return values
+    """Effective input per element. Values are never manually overridden in the
+    Data Foundation; the engine always uses the raw system-of-record value, which
+    is corrected only through re-ingestion or rule-parameter edits."""
+    return load_raw_inputs(db, instance_id)

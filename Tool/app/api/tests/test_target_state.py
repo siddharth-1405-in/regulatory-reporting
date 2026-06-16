@@ -58,20 +58,21 @@ def test_rule_edit_recomputes_and_tags_user_edited(db):
     assert tag == "user-edited"
 
 
-# ---- governed override ------------------------------------------------------
-def test_override_uses_value_and_shows_system_side_by_side(db):
+# ---- corrections flow through re-ingestion (no manual override) -------------
+def test_reingestion_changes_effective_value(db):
     inst = _certified_instance(db)
-    # certified element must be reopened before override
-    dl.reopen(db, inst.id, ["S2_ON_CORP_A"], "Maker", "risk.maker")
-    dl.edit_value(db, instance_id=inst.id, element_code="S2_ON_CORP_A", value=40_000_000,
-                  role="Maker", actor="risk.maker", reason="Late adjustment")
+    raw0 = report_instance_service.load_raw_inputs(db, inst.id)["S2_ON_CORP_A"]
+    assert raw0 == Decimal("25000000")
+    # the engine always uses the raw system value; corrections come from upstream
+    ingestion_service.update_value(db, instance_id=inst.id, element_code="S2_ON_CORP_A",
+                                   value=Decimal("40000000"), actor="risk.maker")
     db.commit()
     eff = report_instance_service.load_inputs(db, inst.id)["S2_ON_CORP_A"]
-    raw = report_instance_service.load_raw_inputs(db, inst.id)["S2_ON_CORP_A"]
-    assert eff == Decimal("40000000") and raw == Decimal("25000000")
+    assert eff == Decimal("40000000")
     dd = dl.drilldown(db, inst.id, "S2_ON_CORP_A")
-    assert dd["override_value"] == 40_000_000 and dd["raw_value"] == 25_000_000
-    assert any(s["step"] == "Manual override" for s in dd["steps"])
+    assert dd["raw_value"] == 40_000_000
+    assert "override_value" not in dd
+    assert [s["step"] for s in dd["steps"]][0] == "Source extract"
 
 
 # ---- two-tier report sign-off ----------------------------------------------

@@ -12,14 +12,6 @@ from ..services import data_layer_service as dl
 router = APIRouter(prefix="/api/instances/{iid}/data-foundation")
 
 
-class EditRequest(BaseModel):
-    element_code: str
-    value: float
-    role: str = "Maker"
-    actor: str = "maker"
-    reason: str = "Manual override"
-
-
 class BulkRequest(BaseModel):
     element_codes: list[str]
     role: str = "Maker"
@@ -53,37 +45,10 @@ def drilldown(iid: int, code: str, db: Session = Depends(get_db)):
     return dl.drilldown(db, iid, code)
 
 
-@router.post("/edit")
-def edit(iid: int, body: EditRequest, db: Session = Depends(get_db)):
-    r = _guard(lambda: dl.edit_value(db, instance_id=iid, element_code=body.element_code,
-                                     value=body.value, role=body.role, actor=body.actor,
-                                     reason=body.reason))
-    db.commit()
-    return {"element_code": body.element_code, "status": r.status, "override_value": float(body.value)}
-
-
-@router.post("/clear-override")
-def clear_override(iid: int, body: EditRequest, db: Session = Depends(get_db)):
-    r = _guard(lambda: dl.clear_override(db, instance_id=iid, element_code=body.element_code,
-                                         role=body.role, actor=body.actor))
-    db.commit()
-    return {"element_code": body.element_code, "status": r.status}
-
-
 def _bulk(iid, body, db, fn):
     changed = _guard(lambda: fn(db, iid, body.element_codes, body.role, body.actor))
     db.commit()
     return {"changed": changed}
-
-
-@router.post("/freeze")
-def freeze(iid: int, body: BulkRequest, db: Session = Depends(get_db)):
-    return _bulk(iid, body, db, dl.freeze)
-
-
-@router.post("/reopen")
-def reopen(iid: int, body: BulkRequest, db: Session = Depends(get_db)):
-    return _bulk(iid, body, db, dl.reopen)
 
 
 @router.post("/submit")

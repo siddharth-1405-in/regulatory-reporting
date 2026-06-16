@@ -2,18 +2,33 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Badge, Button, Panel, Stat, StatusDot } from "@/components/ui";
+import { Database, FileStack } from "lucide-react";
+import { Badge, Button, NavTile, Panel, Stat, StatusDot } from "@/components/ui";
 import { api, endpoints, type Instance, type PlatformOverview } from "@/lib/api";
 
-const statusTone: Record<string, any> = {
-  Draft: "neutral", Exception: "crit", Remediation: "warn", "Signed Off": "ok",
-};
+type CycleStatus = { label: string; tone: any; desc: string };
+
+// One unified, business-legible status per reporting cycle.
+function cycleStatus(i: PlatformOverview["instances"][number]): CycleStatus {
+  if (i.report_status === "Signed Off")
+    return { label: "Signed Off", tone: "ok", desc: "Approved for this cycle" };
+  if (i.failing_rules > 0 || i.open_remediations > 0 || i.buffer_status)
+    return {
+      label: "Needs Attention", tone: "crit",
+      desc: i.failing_rules > 0 ? `${i.failing_rules} exception${i.failing_rules > 1 ? "s" : ""} to resolve`
+        : i.open_remediations > 0 ? "Remediation pending review" : "Capital buffer breach — review required",
+    };
+  if (i.blocking_domains?.length)
+    return { label: "In Progress", tone: "purple", desc: "Data preparation underway, pending certification" };
+  if (i.report_readiness > 0 && i.report_readiness < 100)
+    return { label: "Ready for Sign-off", tone: "warn", desc: "Schedules reviewed, pending final sign-off" };
+  return { label: "Under Review", tone: "neutral", desc: "Draft prepared, ready for review" };
+}
 
 export default function Overview() {
   const qc = useQueryClient();
   const router = useRouter();
   const { data } = useQuery({ queryKey: ["overview"], queryFn: () => api.get<PlatformOverview>(endpoints.overview), refetchInterval: 8000 });
-  const m = data?.metrics;
   const [open, setOpen] = useState(false);
   const [bank, setBank] = useState("Tadawul National Bank (demo)");
   const [period, setPeriod] = useState("Q1 2026");
@@ -24,30 +39,23 @@ export default function Overview() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["overview"] }); setOpen(false); },
   });
 
-  return (
-    <div className="p-6 max-w-[1400px] mx-auto">
-      <div className="flex items-end justify-between mb-4">
-        <div>
-          <div className="eyebrow mb-1">Platform Command Center</div>
-          <h1 className="font-display font-extrabold text-uq-dark-purple text-[22px] tracking-tight">Regulatory Reporting Overview</h1>
-          <p className="text-[12px] text-uq-muted">Cross-pack health, instances and readiness. Report-specific detail lives inside each Report Pack.</p>
-        </div>
-        <Button onClick={() => setOpen((v) => !v)}>+ New report instance</Button>
-      </div>
+  const instances = data?.instances ?? [];
+  const statuses = instances.map(cycleStatus);
+  const count = (label: string) => statuses.filter((s) => s.label === label).length;
 
-      {/* global KPI strip */}
-      <div className="grid grid-cols-6 gap-3 mb-4">
-        <Stat label="Active Reports" value={m?.active_reports ?? "—"} sub={`${m?.active_packs ?? 0} active pack`} />
-        <Stat label="Uncertified Data" value={m?.uncertified_data ?? "—"} sub="data gate not met" tone={m && m.uncertified_data ? "crit" : "ok"} />
-        <Stat label="In Remediation" value={m?.in_remediation ?? "—"} sub="exceptions open" tone={m && m.in_remediation ? "magenta" : "ok"} />
-        <Stat label="Ready for Preview" value={m?.ready_for_preview ?? "—"} sub="clean, awaiting sign-off" />
-        <Stat label="Signed Off" value={m?.signed_off ?? "—"} sub="this cycle" tone="ok" />
-        <Stat label="Source Health" value={data ? `${data.source_health.connected}/${data.source_health.used_in_car}` : "—"}
-          sub={`${data?.source_health.degraded ?? 0} degraded`} tone={data && data.source_health.degraded ? "crit" : "ok"} />
+  return (
+    <div className="h-[calc(100vh-52px)] overflow-hidden flex flex-col p-6 gap-3.5 max-w-[1400px] mx-auto w-full">
+      {/* header */}
+      <div className="flex items-end justify-between shrink-0">
+        <div>
+          <h1 className="font-display font-extrabold text-uq-dark-purple text-[22px] tracking-tight">Regulatory Reporting</h1>
+          <p className="text-[12.5px] text-uq-muted">A unified view of reporting progress, review readiness and sign-off across your regulatory packs.</p>
+        </div>
+        <Button onClick={() => setOpen((v) => !v)}>+ New reporting cycle</Button>
       </div>
 
       {open && (
-        <Panel eyebrow="New" title="Create report instance" className="mb-4">
+        <Panel eyebrow="New" title="Open a reporting cycle" className="shrink-0">
           <div className="grid grid-cols-4 gap-2.5 items-end text-[12px]">
             <label className="flex flex-col gap-1 col-span-2"><span className="kpi-label">Bank legal name</span>
               <input value={bank} onChange={(e) => setBank(e.target.value)} className="rounded-row border border-uq-border px-2.5 py-1.5" /></label>
@@ -55,40 +63,65 @@ export default function Overview() {
               <input value={period} onChange={(e) => setPeriod(e.target.value)} className="rounded-row border border-uq-border px-2.5 py-1.5" /></label>
             <label className="flex flex-col gap-1"><span className="kpi-label">Period end</span>
               <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} className="rounded-row border border-uq-border px-2.5 py-1.5" /></label>
-            <Button onClick={() => create.mutate()} disabled={create.isPending} className="col-span-1">{create.isPending ? "Creating…" : "Create"}</Button>
+            <Button onClick={() => create.mutate()} disabled={create.isPending} className="col-span-1">{create.isPending ? "Opening…" : "Open cycle"}</Button>
           </div>
         </Panel>
       )}
 
-      <div className="grid grid-cols-[1fr_360px] gap-4 items-start">
-        {/* instances */}
-        <Panel eyebrow="Report Instances" title="Active instances · data readiness vs report readiness">
-          <table className="w-full text-[12px]">
-            <thead><tr className="text-left text-uq-purple">
-              {["Pack", "Period", "Report status", "Data", "Report", "Issues", ""].map((h) => (
-                <th key={h} className="font-display font-extrabold uppercase text-[9px] tracking-wider pb-2 border-b border-uq-border">{h}</th>))}
-            </tr></thead>
-            <tbody>
-              {data?.instances.map((i) => (
-                <tr key={i.id} className="border-b border-uq-border/60 hover:bg-uq-alt-light cursor-pointer"
-                  onClick={() => router.push(`/report-pack/car/${i.id}`)}>
-                  <td className="py-2.5"><span className="font-mono text-[10px] text-uq-purple">{i.pack}</span></td>
-                  <td className="font-semibold text-uq-ink">{i.period_label}</td>
-                  <td><Badge tone={statusTone[i.report_status] ?? "neutral"}>{i.report_status}</Badge></td>
-                  <td><Readiness pct={i.data_readiness} /></td>
-                  <td><Readiness pct={i.report_readiness} /></td>
-                  <td>{i.failing_rules > 0 ? <span className="text-crit text-[11px] font-semibold">{i.failing_rules} exc.</span> : <span className="text-ok text-[11px]">clean</span>}</td>
-                  <td className="text-right"><Button variant="ghost">Open ›</Button></td>
-                </tr>
-              ))}
-              {data && data.instances.length === 0 && <tr><td colSpan={7} className="py-8 text-center text-uq-muted">No instances yet.</td></tr>}
-            </tbody>
-          </table>
+      {/* executive KPI strip */}
+      <div className="grid grid-cols-5 gap-3 shrink-0">
+        <Stat label="Active Reporting Cycles" value={data ? instances.length : "—"} sub={`${data?.metrics.active_packs ?? 0} live pack`} />
+        <Stat label="Ready for Review" value={data ? count("Under Review") : "—"} sub="draft prepared" />
+        <Stat label="Awaiting Sign-off" value={data ? count("Ready for Sign-off") : "—"} sub="pending final approval" tone={count("Ready for Sign-off") ? "magenta" : undefined} />
+        <Stat label="Signed Off" value={data ? count("Signed Off") : "—"} sub="this cycle" tone="ok" />
+        <Stat label="Requiring Attention" value={data ? count("Needs Attention") : "—"} sub="exceptions to resolve" tone={count("Needs Attention") ? "crit" : "ok"} />
+      </div>
+
+      {/* primary pathways */}
+      <div className="grid grid-cols-2 gap-3 shrink-0">
+        <NavTile href="/data-foundation" icon={<Database className="w-5 h-5" strokeWidth={2} />}
+          title="Data Foundation" desc="Governed reporting data — ingestion, validation, controls and sign-off" />
+        <NavTile href="/report-pack" icon={<FileStack className="w-5 h-5" strokeWidth={2} />}
+          title="Report Pack" desc="Review-ready packs — narratives, exceptions and report outputs" />
+      </div>
+
+      {/* cycles + portfolio */}
+      <div className="grid grid-cols-[1fr_340px] gap-3.5 flex-1 min-h-0">
+        <Panel eyebrow="Reporting cycle status" title="Active reporting cycles" className="flex flex-col min-h-0">
+          <div className="overflow-auto min-h-0">
+            <table className="w-full text-[12px]">
+              <thead className="sticky top-0 bg-white"><tr className="text-left text-uq-purple">
+                {["Report", "Period", "Entity", "Status", ""].map((h) => (
+                  <th key={h} className="font-display font-extrabold uppercase text-[9px] tracking-wider pb-2 border-b border-uq-border">{h}</th>))}
+              </tr></thead>
+              <tbody>
+                {instances.map((i, idx) => {
+                  const s = statuses[idx];
+                  return (
+                    <tr key={i.id} className="border-b border-uq-border/60 hover:bg-uq-alt-light cursor-pointer"
+                      onClick={() => router.push(`/report-pack/car/${i.id}`)}>
+                      <td className="py-2.5">
+                        <div className="font-semibold text-uq-ink">Capital Adequacy Return</div>
+                        <div className="font-mono text-[9px] text-uq-lavender">{i.pack}</div>
+                      </td>
+                      <td className="font-semibold text-uq-ink">{i.period_label}</td>
+                      <td className="text-uq-muted text-[11px]">{i.bank_name}</td>
+                      <td>
+                        <Badge tone={s.tone}>{s.label}</Badge>
+                        <div className="text-[10px] text-uq-muted mt-0.5">{s.desc}</div>
+                      </td>
+                      <td className="text-right"><Button variant="ghost">Open ›</Button></td>
+                    </tr>
+                  );
+                })}
+                {data && instances.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-uq-muted">No reporting cycles yet.</td></tr>}
+              </tbody>
+            </table>
+          </div>
         </Panel>
 
-        {/* pack catalogue */}
-        <Panel eyebrow="Catalogue" title="Report packs">
-          <div className="flex flex-col gap-2">
+        <Panel eyebrow="Reporting portfolio" title="Regulatory packs" className="flex flex-col min-h-0">
+          <div className="flex flex-col gap-2 overflow-auto min-h-0">
             {data?.packs.map((p) => (
               <div key={p.code} className="rounded-row border border-uq-border p-2.5 flex items-center justify-between">
                 <div>
@@ -101,49 +134,8 @@ export default function Overview() {
               </div>
             ))}
           </div>
-          <div className="mt-2 text-[10px] text-uq-muted">The canonical Data Layer is built to feed every pack; CAR-SA-01 is the first live pack.</div>
         </Panel>
       </div>
-
-      {/* source health strip */}
-      <Panel eyebrow="Source connections" title="Enterprise source systems" className="mt-4">
-        <div className="grid grid-cols-4 gap-2">
-          {data?.sources.filter((s) => s.used_in_car).map((s) => (
-            <div key={s.code} className="rounded-row border border-uq-border p-2.5">
-              <div className="flex items-center justify-between">
-                <span className="font-display font-bold text-[11.5px] text-uq-dark-purple">{s.name}</span>
-                <StatusDot tone={s.status === "connected" ? "ok" : "crit"} />
-              </div>
-              <div className="text-[10px] text-uq-muted">{s.vendor} · {s.car_elements} CAR elements</div>
-            </div>
-          ))}
-        </div>
-      </Panel>
-
-      {/* readiness / blockers */}
-      <Panel eyebrow="Readiness" title="Blockers summary" className="mt-4">
-        <div className="flex flex-wrap gap-2">
-          {data?.instances.flatMap((i) => [
-            ...(i.blocking_domains?.length ? [{ k: `${i.period_label}: certify ${i.blocking_domains.join(", ")}`, t: "warn" }] : []),
-            ...(i.failing_rules > 0 ? [{ k: `${i.period_label}: ${i.failing_rules} validation failure(s)`, t: "crit" }] : []),
-            ...(i.open_remediations > 0 ? [{ k: `${i.period_label}: ${i.open_remediations} remediation pending`, t: "magenta" }] : []),
-          ]).map((b, idx) => <Badge key={idx} tone={b.t as any}>{b.k}</Badge>)}
-          {data && data.instances.every((i) => !i.blocking_domains?.length && !i.failing_rules && !i.open_remediations) &&
-            <span className="text-[12px] text-ok">All instances clear — no platform blockers.</span>}
-        </div>
-      </Panel>
-    </div>
-  );
-}
-
-function Readiness({ pct }: { pct: number }) {
-  const tone = pct >= 100 ? "bg-ok" : pct >= 50 ? "bg-warn" : "bg-crit";
-  return (
-    <div className="flex items-center gap-1.5">
-      <div className="w-16 h-[5px] rounded-pill bg-uq-light-lavender overflow-hidden">
-        <div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
-      </div>
-      <span className="text-[10px] text-uq-muted num">{pct}%</span>
     </div>
   );
 }

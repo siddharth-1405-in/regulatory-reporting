@@ -1,0 +1,908 @@
+You are acting as a senior enterprise product architect, UX strategist, content strategist, and implementation lead for an Agentic AI-based Regulatory Reporting platform for banks.
+
+You are redesigning the Home / Overview page of the platform.
+
+The current page has been criticized because it is too operational, too technical, and not executive-friendly. The new design must be CFO-grade, Finance Head-grade, and business-legible. It should feel premium, enterprise, dense, clear, and purposeful — not like a technical command center.
+
+Context
+This platform is for regulatory reporting in banking. The current MVP is centered around a Capital Adequacy Return / CAR report flow, with supporting modules such as:
+
+Home / Overview
+
+Data Foundation
+
+Report Pack
+
+Admin
+
+The current first page includes several cards and labels such as:
+
+Platform Command Center
+
+Uncertified Data
+
+Source Health
+
+In Remediation
+
+Active reports
+
+Ready for preview
+
+Signed off
+
+Report instances with “data readiness vs report readiness”
+
+A catalogue / report pack list
+
+This language and structure have been rejected.
+
+What must change
+1. Overall page positioning
+The page must no longer feel like a technical operations console.
+It must become a business-facing executive overview.
+
+Remove language like:
+
+“Platform Command Center”
+
+“Uncertified Data”
+
+“Source Health”
+
+“In Remediation”
+
+“data readiness vs report readiness”
+
+Replace the page with a more business-relevant framing:
+
+executive overview
+
+regulatory reporting portfolio
+
+reporting cycle status
+
+management visibility
+
+decision-ready progress
+
+submission posture
+
+review readiness
+
+pack status
+
+The page should immediately answer:
+
+If I am a CFO / Finance Head / Head of Regulatory Reporting, what do I want to know in 5 seconds?
+
+That includes:
+
+What reports matter right now
+
+Which report is in progress
+
+What is ready for review
+
+What needs attention
+
+What is signed off
+
+Where do I go next: Data Foundation or Report Pack
+
+2. Remove bad cards completely
+Remove these cards entirely from the Home page:
+
+Uncertified Data
+
+Source Health
+
+In Remediation
+
+Do not rename them into near-equivalents unless they become clearly business-friendly and materially useful.
+
+The Home page should not expose internal data-processing language that business users do not understand.
+
+3. Redesign KPI cards for CFO-grade relevance
+Replace the current top card strip with a smaller set of high-value executive metrics.
+
+These should be framed in business language and limited to only what matters.
+Examples of better KPI categories:
+
+Active Reporting Cycles
+
+Ready for Review
+
+Awaiting Approval / Sign-off
+
+Submitted / Signed Off
+
+Requiring Attention
+
+Potential alternative labels:
+
+Live Reporting Packs
+
+Review Ready Packs
+
+Awaiting Sign-off
+
+Closed This Cycle
+
+Priority Attention
+
+You may refine the exact naming, but they must be:
+
+business friendly
+
+unambiguous
+
+boardroom-safe
+
+understandable without product training
+
+Each KPI card should contain:
+
+one clear headline metric
+
+one short business subtitle
+
+no jargon
+
+no engineering terminology
+
+4. Add a strong business one-liner at the top
+At the top of the page, under the title, add a CFO-grade one-liner that explains what this platform does in executive terms.
+
+This should be short and premium.
+Examples of the kind of tone expected:
+
+“A unified view of regulatory reporting progress, readiness, and sign-off.”
+
+“Track reporting status, review readiness, and submission progress across critical regulatory packs.”
+
+“A business-ready control layer for regulatory reporting execution.”
+
+Write a few options, then choose the best one for the final design.
+
+5. Add navigation emphasis for Data Foundation and Report Pack
+The Home page must clearly guide users into the two most important product areas:
+
+Data Foundation
+
+Report Pack
+
+These should not just remain passive items in the side nav.
+The Home page itself should include prominent navigation entry points or summary tiles/sections for:
+
+Data Foundation — where governed reporting data is managed
+
+Report Pack — where review, narrative, exceptions, and report outputs are handled
+
+Each should include a one-line explanation in business language.
+
+Example direction:
+
+Data Foundation — Governed reporting data, traceability, and controls
+
+Report Pack — Review-ready packs, narratives, issues, and outputs
+
+Make these feel like natural primary pathways from the homepage.
+
+6. Overhaul the “Report Instances” section completely
+The current section title:
+
+“Active instances · data readiness vs report readiness”
+
+This is poor and must be removed.
+
+The current table also shows:
+
+Data %
+
+Report %
+
+dual readiness logic
+
+This is confusing and should be replaced.
+
+Create a more executive-friendly section focused on reporting cycle progress or active reporting packs.
+
+The section should show one unified status per report instance, not separate data/report percentages.
+
+Use business-friendly statuses such as:
+
+In Progress
+
+Under Review
+
+Ready for Sign-off
+
+Signed Off
+
+Needs Attention
+
+Draft in Preparation
+
+Each row should communicate:
+
+Report / pack name
+
+Reporting period
+
+Overall status
+
+Owner or function (optional if useful)
+
+Last updated or key milestone (optional if useful)
+
+Primary action button
+
+The status must be a single business status, not technical sub-statuses.
+
+If helpful, include a short supporting descriptor such as:
+
+“Draft prepared, pending finance review”
+
+“Ready for checker validation”
+
+“Approved for this cycle”
+
+But keep it concise.
+
+7. Restructure the catalogue
+The current catalogue is too plain and does not earn its place.
+
+Redesign it using better enterprise UX standards.
+
+It should feel like a reporting portfolio / report library / regulatory pack catalogue, not just a generic list.
+
+Requirements:
+
+clearer hierarchy
+
+more polished visual grouping
+
+better labeling
+
+placement that fits the page balance
+
+denser but elegant layout
+
+enterprise premium styling
+
+You may rename “Catalogue” to something better, such as:
+
+Reporting Portfolio
+
+Regulatory Packs
+
+Available Report Packs
+
+Reporting Library
+
+Each item should clearly show:
+
+report name
+
+regulator / frequency / code
+
+lifecycle state, such as Active / Planned / Upcoming
+
+But present it in a cleaner, more useful format than today.
+
+8. Remove scroll — make the page fit in one screen
+This page must have no scroll.
+
+It must fit in a single desktop viewport and feel intentionally composed.
+
+Requirements:
+
+no vertical scrolling
+
+no internal awkward scroll areas
+
+all key content visible above the fold
+
+balance density with readability
+
+use layout hierarchy, spacing compression, and card redesign to fit elegantly
+
+You must redesign content density and section heights accordingly.
+
+If needed:
+
+reduce the number of KPI cards
+
+compress the report list
+
+simplify the catalogue presentation
+
+use a better 2-column or asymmetric enterprise dashboard layout
+
+But do not make it feel cramped or unfinished.
+
+9. Tone and visual direction
+The page should feel:
+
+executive
+
+premium
+
+enterprise-grade
+
+audit-aware
+
+business-friendly
+
+dense but clean
+
+confident
+
+purposeful
+
+Avoid:
+
+generic SaaS feel
+
+developer console feel
+
+operational jargon
+
+overly decorative UI
+
+excessive whitespace
+
+toy-like badges
+
+unnecessary labels
+
+Prefer:
+
+sharp hierarchy
+
+strong titles
+
+concise labels
+
+meaningful status language
+
+compact but readable cards
+
+mature enterprise polish
+
+
+You are a senior enterprise product architect, UX strategist, content strategist, and full-stack implementation lead working on an Agentic AI-based Regulatory Reporting platform for banks.
+
+Your task is to redesign and implement the Data Foundation page of the product so that it follows the same upgraded UI/UX principles, visual density, hierarchy, polish, and enterprise-grade audit-oriented design language already applied to the revised home page.
+
+The current Data Foundation page has these broad sections:
+
+Page title and description
+
+Reporting period selector
+
+Tabs such as Source Systems / Canonical Elements / Rule Engine
+
+A main working panel with a table/grid
+
+A side sign-off queue panel
+
+The redesign must preserve the product’s premium regulatory reporting feel, but make the page much more business-friendly, CFO-ready, operationally clear, and aligned to how report data is actually prepared and signed off.
+
+Core objective
+Reframe the Data Foundation page from a vague technical setup page into a business-ready report data preparation workflow.
+
+The page should clearly communicate this end-to-end flow:
+
+Data ingestion → Data validation → Rule engine → Report-ready data elements → Maker submission → Checker sign-off → Go to Report Pack
+
+Everything before Maker submission should be system-driven / automated.
+Maker and Checker should only operate on the final report-ready data elements stage.
+No manual override of data element values is allowed.
+
+Mandatory product and UX changes
+1. Apply the same new homepage design principles
+Use the exact same improved design principles and visual system that were applied to the updated home page:
+
+denser and cleaner layout
+
+stronger hierarchy
+
+better spacing discipline
+
+less empty space
+
+premium enterprise look
+
+audit-focused and operational
+
+more polished cards, headers, tables, and navigation
+
+clearer labels, reduced vagueness
+
+better visual grouping of workflow stages
+
+more intentional alignment and information architecture
+
+Do not leave the page looking like a generic SaaS admin screen.
+It must feel like a serious bank-grade regulatory operations product.
+
+2. Replace vague terminology
+The current language is too vague and too internal.
+
+Specifically:
+
+Replace “Canonical Elements”
+
+Replace “Governed Canonical data - shared foundation”
+
+Replace any wording that sounds abstract, technical, or architecture-led rather than business-led
+
+Use business-friendly, CFO-grade language that a CFO, Finance Head, Controller, Regulatory Reporting Head, or Risk Head will immediately understand.
+
+The replacement terminology should communicate:
+
+these are trusted report inputs
+
+they are standardized / governed
+
+they are ready to feed regulatory schedules
+
+they are business meaningful, not technical constructs
+
+Provide better naming options and choose the best one in the UI. Preferred direction:
+
+Report-Ready Data Elements
+
+Certified Report Inputs
+
+Governed Report Inputs
+
+Approved Reporting Data
+
+Regulatory Reporting Inputs
+
+Pick one primary term and use it consistently across the page.
+The final label should feel executive-friendly and audit-ready.
+
+3. Add report selection prominently at the top
+At the top of the Data Foundation page, add a clearly called-out control for:
+
+Select Report
+
+This should be more prominent than the current reporting period selector.
+The user must first understand which regulatory report they are preparing report data elements for.
+
+Examples:
+
+Capital Adequacy Return (CAR)
+
+Liquidity Coverage Ratio (LCR)
+
+NSFR
+
+Large Exposures
+
+Leverage Ratio
+
+This should appear at the top in a strong contextual header area, alongside:
+
+Report selector
+
+Reporting period
+
+Legal entity / bank
+
+Status indicator if relevant
+
+Make this feel like the page is scoped to a specific report preparation context.
+
+4. Redesign the workflow into clear sequential stages
+The Data Foundation page must visually and functionally follow this explicit sequence:
+
+Data Ingestion
+
+Data Validation
+
+Rule Engine
+
+Report-Ready Data Elements
+
+Maker Submission
+
+Checker Sign-off
+
+Go to Report Pack
+
+The UI should make this flow obvious.
+This should not just be hidden inside tabs.
+Use a clearer workflow-oriented layout:
+
+either stage tabs
+
+or a horizontal stepper
+
+or segmented workflow blocks
+
+or a hybrid stage navigator + work area
+
+Each stage should feel purposeful and business meaningful.
+
+5. Data ingestion stage requirements
+In Data Ingestion, provide exactly two ingestion options:
+
+Option A: Connect to Source System
+This should support enterprise source connection behavior conceptually.
+The UI should communicate connecting to systems like:
+
+SAP S/4HANA
+
+Oracle GL
+
+Treasury system
+
+Risk engine
+
+Data warehouse
+
+Manual managed source feed
+
+This does not need real backend integration unless already present, but the UI and architecture should support it cleanly.
+
+Option B: Upload via Template
+This must include:
+
+a Download Template button
+
+an Upload Completed Template button
+
+clear text that template-based upload is the controlled fallback if no live source connection is used
+
+The upload option must feel formal and governed, not like a casual file upload.
+It should feel like a controlled reporting intake process.
+
+6. Add a mandatory Data Validation step
+There must be a dedicated Data Validation step between ingestion and rule engine.
+
+This stage should check for:
+
+completeness
+
+mandatory field presence
+
+formatting issues
+
+basic validation failures
+
+duplication
+
+invalid values
+
+inconsistent units / date structure if relevant
+
+simple integrity errors expected during upload or system connection
+
+Represent this in a business-friendly way.
+The UX should not feel like raw technical logs.
+Use structured validation summaries such as:
+
+Passed checks
+
+Exceptions found
+
+Records requiring attention
+
+Severity buckets
+
+Validation categories
+
+Suggested categories:
+
+Completeness
+
+Format & structure
+
+Duplicates
+
+Value integrity
+
+Mapping issues
+
+This step must feel operational and trustworthy.
+
+7. No data overwrite by Maker or Checker
+This is critical.
+
+There should be no manual override allowed by Maker or Checker on the report data element values.
+Remove any current override-oriented behavior in the grid.
+
+That means:
+
+no editable override column
+
+no freeze / reopen / manual overwrite flow for values
+
+no “maker edits certified numbers directly” pattern
+
+Instead:
+
+upstream ingestion and rule processing generate the report-ready data elements
+
+Maker reviews and submits the report-ready data elements
+
+Checker reviews and signs off
+
+values themselves are not manually overwritten in this stage
+
+If adjustment logic is needed, it should happen through either:
+
+corrected ingestion data
+
+modified rule parameters in the Rule Engine
+
+or a governed re-run of the workflow
+
+Make this explicit in both product logic and UI text.
+
+8. Rule Engine behavior
+The Rule Engine stage should be editable by the Maker.
+
+The Maker should be able to modify:
+
+rules
+
+metrics
+
+parameters
+
+thresholds
+
+mappings where applicable
+
+When the Maker modifies rule logic or parameters:
+
+automatic recalculation must happen
+
+downstream report-ready data elements refresh automatically
+
+there is no sign-off on modified rules themselves
+
+Sign-off applies only to the final report-ready data elements, not to the rules.
+
+The Rule Engine UX should feel powerful but controlled:
+
+show rule name
+
+business description
+
+input dependency
+
+parameter value
+
+impact preview if possible
+
+recalculation status
+
+last updated metadata
+
+Keep it CFO-grade and explainable, not overly technical.
+
+9. Report-ready data elements stage
+This stage is the business replacement for “Canonical Elements.”
+
+This should become the core review grid where users see:
+
+data element name
+
+business definition
+
+source lineage
+
+calculated / derived value
+
+validation status
+
+rule trace or derivation trace
+
+readiness status for report use
+
+maker submission state
+
+checker sign-off state
+
+The naming, layout, and content must help a business reviewer understand:
+
+what this value is
+
+where it came from
+
+whether it passed validation
+
+whether it is ready for the report pack
+
+Use CFO-facing terminology.
+Avoid deep architecture jargon.
+
+10. Maker and Checker flow
+The interaction model must be:
+
+ingestion, validation, and rule application are automated
+
+report-ready data elements are produced
+
+Maker reviews and submits the report-ready data elements
+
+Checker signs off on the submitted report-ready data elements
+
+There should be no sign-off at the ingestion step or validation step or rule step.
+
+The sign-off panel should be redesigned accordingly:
+
+clearer queue language
+
+no vague empty state
+
+indicate counts such as pending maker submission / pending checker review / signed off
+
+show workflow state clearly
+
+Use enterprise-grade workflow terms:
+
+Ready for submission
+
+Submitted by Maker
+
+Pending Checker review
+
+Signed off
+
+Returned for correction only if really needed in flow design
+
+If you include return behavior, it should return the package back for correction through upstream data or rule revision, not manual overwrite.
+
+11. Add a strong CTA to go to Report Pack
+After all prior steps are completed and sign-off is done or sufficiently advanced, there should be a clear CTA button:
+
+Go to Report Pack
+
+This should feel like the natural continuation of the workflow.
+Place it in a strong but not noisy location:
+
+top-right contextual action area
+
+sticky footer action bar
+
+or completion panel
+
+The logic should make it clear that Data Foundation feeds the Report Pack.
+
+12. Improve top page messaging
+The top header text should be rewritten.
+Avoid vague text like:
+
+source → ingest → canonical element → rule engine → maker-checker
+
+one certified foundation feeding every report pack
+
+Rewrite this with sharper, business-relevant messaging suitable for CFOs and Finance Heads.
+
+The top message should communicate something closer to:
+
+this is where data is prepared for a selected regulatory report
+
+inputs are ingested, validated, transformed, and made report-ready
+
+only report-ready data elements are submitted and signed off
+
+this foundation feeds the report pack
+
+Keep it concise, premium, and clear.
+
+Information architecture to implement
+Design the page around this structure:
+
+A. Context header
+Contains:
+
+Page title
+
+Short explanatory subtitle
+
+Select Report
+
+Reporting period
+
+Legal entity
+
+Current workflow status
+
+CTA to Go to Report Pack when relevant
+
+B. Workflow navigator
+A clearly visible staged flow:
+
+Data Ingestion
+
+Data Validation
+
+Rule Engine
+
+Report-Ready Data Elements
+
+Submission & Sign-off
+
+This can be one row, but should feel premium and compact.
+
+C. Main work area
+Changes by selected stage.
+
+For Data Ingestion:
+source connection cards
+
+upload via template card
+
+downloadable template CTA
+
+upload button
+
+connection status
+
+last ingest timestamp
+
+source coverage summary
+
+For Data Validation:
+validation summary cards
+
+exception breakdown
+
+failed records / unresolved issues
+
+validation run button if needed
+
+last validation timestamp
+
+For Rule Engine:
+rule list / parameters
+
+editable business rules
+
+auto recalculation behavior
+
+impact on downstream reporting elements
+
+For Report-Ready Data Elements:
+enterprise review grid
+
+search
+
+filter by schedule / section / status
+
+source trace
+
+validation result
+
+derivation / rule trace
+
+maker submit action
+
+checker sign-off action
+
+D. Right rail or action panel
+May include:
+
+workflow summary
+
+submission status
+
+checker queue
+
+unresolved issues
+
+readiness indicator
+
+button to go to report pack
+
+This should be useful, not empty filler.
+

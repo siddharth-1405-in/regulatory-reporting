@@ -240,10 +240,13 @@ class ConfigParameter(Base):
 
 
 # ---- data-layer element governance (per instance + element) -----------------
-# status lifecycle (maker-checker on the shared canonical data layer):
-#   draft -> edited -> frozen -> submitted -> certified
-#                                   submitted -> rejected -> (edited)
-#   certified -> invalidated  (when an approved value later changes)
+# status lifecycle (maker-checker attestation on report-ready data elements):
+#   draft (ready for submission) -> submitted -> certified
+#                                    submitted -> rejected
+#   certified | submitted -> invalidated  (when upstream data later changes)
+#   rejected | invalidated -> submitted   (re-submit after an upstream fix)
+# Values are never overwritten here; corrections flow through re-ingestion or
+# rule-parameter edits (see report_instance_service / rules_service).
 class ElementGovernance(Base):
     __tablename__ = "element_governance"
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -257,9 +260,6 @@ class ElementGovernance(Base):
     approved_by: Mapped[str | None] = mapped_column(String(80))
     approved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     reject_reason: Mapped[str] = mapped_column(Text, default="")
-    # governed manual override (system/raw value stays in ElementValue.raw_value)
-    override_value: Mapped[float | None] = mapped_column(Numeric(24, 3))
-    override_reason: Mapped[str] = mapped_column(Text, default="")
 
 
 # ---- enterprise source systems ---------------------------------------------
