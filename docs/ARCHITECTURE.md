@@ -32,15 +32,29 @@ engine therefore computes semantically from the canonical registry and the
 Excel export writes computed **values** into the template, repairing those
 references (`registry/car_sa01/cell_map.py`).
 
+## Workflow (Draft → signed off)
+An instance starts in **Draft** — data ingested and quality-checked, but **not
+certified** (all elements "Ready for submission"). The maker submits report-ready
+elements; a Checker signs them off, which **rolls up** to Finance/Risk domain
+certification, opens the calc gate, and **auto-recomputes** the draft (no "Run"
+button). Schedule → Summary sign-off in the Report Pack is a separate attestation
+layered on top. The seeded demo deliberately ships in this Draft state so the
+full governed workflow is demonstrated end to end.
+
 ## Governance invariants (enforced in services)
 - **Certification gate** — no `CalcRun` until Finance **and** Risk certify their
-  owned elements (`certification_service.is_calc_allowed`).
+  owned elements (`certification_service.is_calc_allowed`). Element sign-off
+  (`data_layer_service.approve`) rolls up to domain certification, then triggers
+  `calc_service.ensure_current` (recompute + governed agents).
 - **Invalidation** — any input change invalidates the owning domain's
-  certification and re-blocks calculation.
+  certification, re-blocks calculation, and auto-reopens affected schedule sign-offs.
 - **Agent containment** — agents write only `agent_run` / `remediation_proposal`
   / `narrative`. A `RemediationProposal` is applied only when a **Checker**
   approves it (`remediation_service.approve`), which re-certifies and recalculates.
-- **Export gate** — export requires Checker sign-off and zero failing validations.
+  The narrative is regenerated **in place** (one EN + one AR row); once approved it
+  is injected at the top of the PDF and Excel exports.
+- **Export is ungated** — Excel and PDF can be produced at any time; the output
+  carries a **Draft / Signed Off** badge (no hard gate on sign-off).
 - **Audit** — every material action is appended to `audit_log`.
 
 ## The seeded scenario

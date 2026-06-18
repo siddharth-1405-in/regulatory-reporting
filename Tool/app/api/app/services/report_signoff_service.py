@@ -16,15 +16,18 @@ from ..models import RemediationProposal, ScheduleSignoff, ValidationResult
 from . import audit_service, certification_service
 from .data_layer_service import RolePermissionError, _require
 
+# Display order = Cover, Summary, then S1–S6. Summary attestation is still gated
+# on all S1–S6 (see _SUB_SCHEDULES + schedule_view); ordering here is presentation
+# only and is what the frontend renders.
 SCHEDULES = [
     ("Cover", "Cover", []),
+    ("Summary", "Summary — Capital Adequacy Ratios", ["Finance", "Risk"]),
     ("S1", "S1 — Regulatory Capital Composition", ["Finance"]),
     ("S2", "S2 — Credit Risk Risk-Weighted Assets", ["Risk"]),
     ("S3", "S3 — Market Risk Capital Charge (Standardised Approach)", ["Risk"]),
     ("S4", "S4 — Operational Risk Capital Charge (Standardised Approach)", ["Finance"]),
     ("S5", "S5 — Capital Buffers & Combined Capital Requirement", ["Finance", "Risk"]),
     ("S6", "S6 — Reconciliation to Published Financial Statements", ["Finance"]),
-    ("Summary", "Summary — Capital Adequacy Ratios", ["Finance", "Risk"]),
 ]
 SCHEDULE_KEYS = [k for k, _, _ in SCHEDULES]
 LABELS = {k: lbl for k, lbl, _ in SCHEDULES}

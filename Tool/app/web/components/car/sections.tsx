@@ -1,6 +1,7 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Sparkles } from "lucide-react";
 import { AiBadge, Badge, Button, Panel, StatusDot } from "@/components/ui";
 import {
   api, endpoints, type AgentRun, type CalcResult, type Narrative,
@@ -175,7 +176,15 @@ export function ReasoningSection({ id }: { id: number }) {
 // ============================ NARRATIVE ====================================
 export function NarrativeSection({ id }: { id: number }) {
   const qc = useQueryClient();
-  const { data: narrs = [] } = useQuery({ queryKey: ["narratives", id], queryFn: () => api.get<Narrative[]>(endpoints.narratives(id)) });
+  const { data: narrsRaw = [] } = useQuery({ queryKey: ["narratives", id], queryFn: () => api.get<Narrative[]>(endpoints.narratives(id)) });
+  // one card per language — show only the latest revision (regenerate overwrites in place)
+  const narrs = useMemo(() => {
+    const byLang: Record<string, Narrative> = {};
+    for (const n of narrsRaw) {
+      if (!byLang[n.language] || n.version > byLang[n.language].version) byLang[n.language] = n;
+    }
+    return Object.values(byLang).sort((a, b) => (a.language === "en" ? -1 : 1));
+  }, [narrsRaw]);
   const approve = useMutation({
     mutationFn: (nid: number) => api.post(`/instances/${id}/narratives/${nid}/approve`, { actor: "cro.checker" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["narratives", id] }),
@@ -218,9 +227,14 @@ export function NarrativeSection({ id }: { id: number }) {
                 dir={n.language === "ar" ? "rtl" : "ltr"}>{n.body}</p>
             </div>
             <div className="flex items-center justify-between mt-2.5">
-              <span className="text-[10px] text-uq-muted">AI confidence: {pct(n.confidence, 0)} · Narrative Agent v{n.version}</span>
+              <span className="text-[10px] text-uq-muted">AI confidence: {pct(n.confidence, 0)} · Narrative Agent · revision {n.version}</span>
               {n.status !== "approved" && <Button onClick={() => approve.mutate(n.id)} disabled={approve.isPending}>Approve narrative</Button>}
             </div>
+            {n.status === "approved" && n.language === "en" && (
+              <div className="mt-2 text-[10px] text-ok flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> Approved — included at the top of the PDF & Excel exports.
+              </div>
+            )}
           </Panel>
         ))}
       </div>

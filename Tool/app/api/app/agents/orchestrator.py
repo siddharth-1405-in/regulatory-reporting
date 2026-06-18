@@ -44,18 +44,25 @@ def run_governed_pipeline(db: Session, instance_id: int, result: CarResult,
             summary["remediation_proposal_id"] = rp.id
             report_instance_service.set_status(db, instance_id, "REMEDIATION", actor=actor)
 
-    # 3. narrative (EN + AR drafts)
+    # 3. narrative (EN + AR drafts) — overwrite in place, one row per language.
+    # Re-creating the narrative refreshes the existing draft (version = revision
+    # count) instead of stacking new versions; status resets to 'draft' for re-approval.
     narr_result, narr = narrative_agent.run(result)
     narr_run = base.persist(db, instance_id, narr_result)
     summary["agent_runs"].append(narr_run.id)
     for lang in ("en", "ar"):
-        prev = (db.query(Narrative).filter(Narrative.instance_id == instance_id,
-                                           Narrative.language == lang)
-                .order_by(Narrative.version.desc()).first())
-        n = Narrative(instance_id=instance_id, language=lang,
-                      version=(prev.version + 1) if prev else 1, body=narr[lang],
-                      citations=narr["citations"], confidence=narr["confidence"], status="draft")
-        db.add(n)
+        n = (db.query(Narrative).filter(Narrative.instance_id == instance_id,
+                                        Narrative.language == lang)
+             .order_by(Narrative.version.desc()).first())
+        if n is None:
+            n = Narrative(instance_id=instance_id, language=lang, version=1)
+            db.add(n)
+        else:
+            n.version = (n.version or 1) + 1
+        n.body = narr[lang]
+        n.citations = narr["citations"]
+        n.confidence = narr["confidence"]
+        n.status = "draft"
         db.flush()
         summary["narrative_ids"].append(n.id)
 

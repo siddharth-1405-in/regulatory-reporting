@@ -22,7 +22,7 @@ export function ReportReadyElements({ id }: { id: number }) {
   const { data: queue = [] } = useQuery({ queryKey: ["signoff", id], queryFn: () => api.get<any[]>(endpoints.signoffQueue(id)) });
 
   const [sheet, setSheet] = useState("All");
-  const [domain, setDomain] = useState("All");
+  const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "submitted" | "certified">("all");
   const [q, setQ] = useState("");
   const [sel, setSel] = useState<Set<string>>(new Set());
   const [drill, setDrill] = useState<string | null>(null);
@@ -51,14 +51,16 @@ export function ReportReadyElements({ id }: { id: number }) {
   });
 
   const rows = useMemo(() => (cat?.elements ?? []).filter((e) =>
-    (sheet === "All" || e.sheet_name === sheet) && (domain === "All" || e.domain === domain) &&
+    (sheet === "All" || e.sheet_name === sheet) &&
+    (statusFilter === "all" || (!e.derived && e.status === statusFilter)) &&
     (!q || e.label.toLowerCase().includes(q.toLowerCase()) || e.element_code.toLowerCase().includes(q.toLowerCase()))
-  ), [cat, sheet, domain, q]);
+  ), [cat, sheet, statusFilter, q]);
+  const selectable = rows.filter((r) => !r.derived);
   const selCodes = [...sel];
   const toggle = (c: string) => setSel((s) => { const n = new Set(s); n.has(c) ? n.delete(c) : n.add(c); return n; });
   const toggleAll = () => {
-    if (selCodes.length === rows.length) setSel(new Set());
-    else setSel(new Set(rows.map((r) => r.element_code)));
+    if (selCodes.length === selectable.length) setSel(new Set());
+    else setSel(new Set(selectable.map((r) => r.element_code)));
   };
 
   const { data: dd } = useQuery<Drilldown>({ queryKey: ["drilldown", id, drill], enabled: !!drill, queryFn: () => api.get(endpoints.dfDrilldown(id, drill!)) });
@@ -90,18 +92,22 @@ export function ReportReadyElements({ id }: { id: number }) {
           actions={
             <div className="flex items-center gap-1.5">
               <input placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} className="rounded-row border border-uq-border px-2 py-1 text-[11px] w-28" />
-              <select value={domain} onChange={(e) => setDomain(e.target.value)} className="rounded-row border border-uq-border px-2 py-1 text-[11px]">
-                {["All", "Finance", "Risk"].map((d) => <option key={d}>{d}</option>)}
-              </select>
+              {([["draft", "Ready for submission"], ["submitted", "Submitted"], ["certified", "Signed-Off"]] as const).map(([key, label]) => (
+                <button key={key} onClick={() => setStatusFilter((s) => s === key ? "all" : key)}
+                  className={`chip ${statusFilter === key ? "bg-uq-purple text-white" : "bg-uq-alt-light text-uq-mid"}`}>
+                  {label}
+                </button>
+              ))}
             </div>}>
           <div className="flex gap-1 mb-2 flex-wrap">
             {SHEETS.map((s) => <button key={s} onClick={() => setSheet(s)} className={`chip ${sheet === s ? "bg-uq-purple text-white" : "bg-uq-alt-light text-uq-mid"}`}>{s.replace("Schedule ", "S")}</button>)}
           </div>
           <div className="flex items-center gap-2 mb-2 min-h-[30px]">
             <span className="text-[11px] text-uq-muted">{selCodes.length} selected</span>
-            {isMaker && <>
+            {isMaker && !allSignedOff && (
               <Button variant="soft" disabled={!selCodes.length} onClick={() => bulk.mutate({ ep: endpoints.dlSubmit(id), codes: selCodes })}>Submit for sign-off</Button>
-            </>}
+            )}
+            {isMaker && allSignedOff && <Badge tone="ok">All elements signed off</Badge>}
             {isChecker && <>
               <Button disabled={!selCodes.length} onClick={() => bulk.mutate({ ep: endpoints.dlApprove(id), codes: selCodes })}>Sign-off</Button>
               <Button variant="ghost" disabled={!selCodes.length} onClick={() => bulk.mutate({ ep: endpoints.dlReject(id), codes: selCodes })}>Return for correction</Button>
@@ -121,17 +127,23 @@ export function ReportReadyElements({ id }: { id: number }) {
               </thead>
               <tbody>
                 {rows.map((e) => (
-                  <tr key={e.element_code} className="border-b border-uq-border/50 hover:bg-uq-alt-light align-top">
-                    <td className="p-2"><input type="checkbox" checked={sel.has(e.element_code)} onChange={() => toggle(e.element_code)} /></td>
+                  <tr key={e.element_code} className={`border-b border-uq-border/50 hover:bg-uq-alt-light align-top ${e.derived ? "bg-uq-alt-light/40" : ""}`}>
+                    <td className="p-2">{e.derived
+                      ? <span className="text-uq-lavender text-[10px]" title="Derived — not signed off here">—</span>
+                      : <input type="checkbox" checked={sel.has(e.element_code)} onChange={() => toggle(e.element_code)} />}</td>
                     <td className="p-2">
                       <div className="text-uq-ink font-medium">{e.label}</div>
                       <div className="text-[9.5px] text-uq-muted leading-tight">{e.business_meaning}</div>
                     </td>
                     <td className="p-2 text-uq-muted text-[10px]">{e.source_system}<span className={`ml-1 ${e.domain === "Risk" ? "text-uq-magenta" : "text-uq-purple"}`}>· {e.domain}</span></td>
-                    <td className="p-2 text-right num text-uq-ink">{money(e.value)}</td>
-                    <td className="p-2"><StatusPill status={e.status} /></td>
+                    <td className="p-2 text-right num text-uq-ink">{e.display ?? money(e.value)}</td>
+                    <td className="p-2">{e.derived
+                      ? <Badge tone="neutral">Derived</Badge>
+                      : <StatusPill status={e.status} />}</td>
                     <td className="p-2 text-right whitespace-nowrap">
-                      <button className="text-[10px] text-uq-purple hover:underline" onClick={() => setDrill(e.element_code)}>trace</button>
+                      {e.derived
+                        ? <span className="text-[9px] text-uq-lavender">S1–S4 + buffers</span>
+                        : <button className="text-[10px] text-uq-purple hover:underline" onClick={() => setDrill(e.element_code)}>trace</button>}
                     </td>
                   </tr>
                 ))}

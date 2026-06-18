@@ -77,20 +77,30 @@ export default function Overview() {
         <Stat label="Requiring Attention" value={data ? count("Needs Attention") : "—"} sub="exceptions to resolve" tone={count("Needs Attention") ? "crit" : "ok"} />
       </div>
 
-      {/* Regulatory Report Portfolio — centred, full-width, prominent */}
+      {/* Regulatory Report Portfolio — single row; only the active pack is clickable */}
       <Panel eyebrow="Reporting portfolio" title="Regulatory Report Portfolio" className="shrink-0">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2.5">
-          {data?.packs.map((p) => (
-            <div key={p.code} className="rounded-row border border-uq-border p-2.5 flex items-center justify-between gap-2">
-              <div>
-                <div className="font-display font-bold text-[12px] text-uq-dark-purple leading-tight">{p.name}</div>
-                <div className="text-[10px] text-uq-muted mt-0.5">{p.regulator} · {p.frequency} · <span className="font-mono">{p.code}</span></div>
+        <div className="flex gap-2.5 overflow-x-auto pb-1">
+          {data?.packs.map((p) => {
+            const active = p.status === "active";
+            const target = instances[0]?.id;
+            const clickable = active && target != null;
+            return (
+              <div key={p.code}
+                onClick={() => clickable && router.push(`/report-pack/car/${target}`)}
+                title={active ? "Open the Capital Adequacy Return report pack" : "Planned — part of the next rollout"}
+                className={`flex-1 min-w-[190px] rounded-row border p-2.5 flex items-center justify-between gap-2 transition ${
+                  clickable ? "border-uq-border hover:border-uq-magenta hover:bg-uq-alt-light cursor-pointer"
+                            : "border-uq-border/70 bg-uq-near-white opacity-70 cursor-not-allowed"}`}>
+                <div>
+                  <div className="font-display font-bold text-[12px] text-uq-dark-purple leading-tight">{p.name}</div>
+                  <div className="text-[10px] text-uq-muted mt-0.5">{p.regulator} · {p.frequency} · <span className="font-mono">{p.code}</span></div>
+                </div>
+                {active
+                  ? <Badge tone="ok"><StatusDot tone="ok" /> Active</Badge>
+                  : <Badge tone="neutral">Planned</Badge>}
               </div>
-              {p.status === "active"
-                ? <Badge tone="ok"><StatusDot tone="ok" /> Active</Badge>
-                : <Badge tone="neutral">Planned</Badge>}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Panel>
 

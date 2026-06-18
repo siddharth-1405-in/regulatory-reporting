@@ -99,34 +99,24 @@ def main(reset: bool = True):
         all_inputs = report_instance_service.load_inputs(db, inst.id)
         dq_service.run(db, inst.id, all_inputs)
 
-        # certify both domains so the calculation gate opens (this cascades
-        # element-level governance to 'certified' for the shared Data Layer)
-        certification_service.certify(db, inst.id, "Finance", actor="cfo.checker")
-        certification_service.certify(db, inst.id, "Risk", actor="cro.checker")
-        data_layer_service.ensure_governance(db, inst.id)
-
+        # Leave the instance in the maker→checker STARTING state: data is ingested
+        # and quality-checked, but NOT yet certified. Element governance starts at
+        # 'draft' (ready for submission); the calculation gate is closed. The demo
+        # then drives the full governed workflow end to end:
+        #   Maker submits → Checker signs off → domain certifies → the draft
+        #   auto-computes (calc + governed agents) and the seeded Schedule 2 anomaly
+        #   surfaces the buffer breach + a pending remediation proposal.
+        data_layer_service.ensure_governance(db, inst.id)      # draft rows
         report_signoff_service.ensure_signoffs(db, inst.id)
-        run, result, findings = calc_service.run_calculation(db, inst.id, actor="seed")
-
-        # optional: governed agents (available after task 8)
-        try:
-            from app.agents import orchestrator
-            orchestrator.run_governed_pipeline(db, inst.id, result, findings, actor="seed")
-        except Exception as exc:  # agents not yet wired or no API key path
-            print(f"[seed] agents step skipped: {exc}")
-
         db.commit()
 
-        m = run.results["metrics"]
-        fails = [f for f in findings if f["status"] == "fail"]
-        print("\n=== CAR-SA-01 demo instance seeded ===")
-        print(f"  instance_id   : {inst.id}  ({inst.period_label})")
-        print(f"  Total RWA     : {m['total_rwa']:,.0f}  (SAR '000)")
-        print(f"  CET1 ratio    : {m['cet1_ratio']*100:.2f}%")
-        print(f"  Total ratio   : {m['total_ratio']*100:.2f}%")
-        print(f"  Buffer status : {run.results['flags']['buffer_status']}")
-        print(f"  Validation    : {len(fails)} failing rule(s): "
-              f"{', '.join(f['rule_code'] for f in fails)}")
+        summary = data_layer_service.status_summary(db, inst.id)
+        print("\n=== CAR-SA-01 demo instance seeded (Draft - pending sign-off) ===")
+        print(f"  instance_id    : {inst.id}  ({inst.period_label})")
+        print(f"  element status : {summary}")
+        print("  next step      : Data Foundation -> Maker 'Submit for sign-off' ->")
+        print("                   Checker 'Sign-off' -> report auto-computes")
+        print("                   (Schedule 2 anomaly -> buffer breach -> remediation).")
     finally:
         db.close()
 

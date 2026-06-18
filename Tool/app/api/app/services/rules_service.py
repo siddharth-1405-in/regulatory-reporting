@@ -41,6 +41,40 @@ def list_rules(db: Session, instance_id: int) -> list[dict]:
             "element_code": e.element_code, "label": e.label, "sheet_name": e.sheet_name,
             "domain": e.source_domain, **rule, "tag": tag,
         })
+    out.extend(_buffer_rules(db))
+    return out
+
+
+# Schedule 5 buffer rates are regulatory parameters (not source data elements),
+# so they belong in the rule engine as editable rules. Editing routes through
+# edit_rule -> config_service buffer scope -> auto-recompute.
+_BUFFER_RULES = [
+    ("ccb", "Capital Conservation Buffer (CCB)",
+     "Fixed conservation buffer of {pct} of total RWA, met with CET1 on top of the 4.50% minimum."),
+    ("ccyb", "Countercyclical Capital Buffer (CCyB)",
+     "Countercyclical buffer of {pct} of total RWA in force for the reporting jurisdiction."),
+    ("dsib", "D-SIB Surcharge",
+     "Domestic systemically-important bank surcharge of {pct} of total RWA."),
+    ("other", "Other SAMA-prescribed buffers",
+     "Any further SAMA-prescribed buffer of {pct} of total RWA."),
+]
+
+
+def _buffer_rules(db: Session) -> list[dict]:
+    _, buffers = config_service.get_params_and_buffers(db)
+    overridden = {p.key for p in config_service.list_parameters(db) if p.scope == "buffer"}
+    out = []
+    for key, label, template in _BUFFER_RULES:
+        val = float(buffers.get(key, 0))
+        edited = key in overridden
+        out.append({
+            "element_code": f"S5_{key.upper()}", "label": label, "sheet_name": "Schedule 5",
+            "domain": "Finance/Risk", "rule_name": "Capital buffer rate", "rule_type": "buffer",
+            "plain_english": template.format(pct=f"{val*100:.2f}%"),
+            "editable_params": [{"key": key, "label": label, "value": val, "format": "pct"}],
+            "origin": "SAMA Basel III capital buffer framework", "editable": True,
+            "tag": "user-edited" if edited else "system",
+        })
     return out
 
 

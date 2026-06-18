@@ -158,14 +158,16 @@ function ScheduleView({ id, schedKey, view, onBreachClick }: { id: number; sched
             </tr></thead>
             <tbody>
               {data.lines.map((l) => (
-                <tr key={l.element_code} className="border-b border-uq-border/50 hover:bg-uq-alt-light align-top">
-                  <td className="py-1.5 text-uq-ink">{l.label}<div className="font-mono text-[9px] text-uq-lavender">{l.element_code}</div></td>
+                <tr key={l.element_code} className={`border-b border-uq-border/50 hover:bg-uq-alt-light align-top ${l.emphasis ? "bg-uq-alt-light/60" : ""}`}>
+                  <td className={`py-1.5 text-uq-ink ${l.emphasis ? "font-display font-bold text-uq-dark-purple" : ""}`}>{l.label}<div className="font-mono text-[9px] text-uq-lavender">{l.element_code}</div></td>
                   <td className="py-1.5 text-uq-muted text-[10px] max-w-[220px]">{l.business_meaning}</td>
                   <td className="py-1.5 text-uq-muted text-[10px] max-w-[260px] italic">
                     {l.computation || "This line is directly sourced and requires no separate computation."}
                   </td>
-                  <td className="py-1.5 text-right num font-semibold text-uq-dark-purple">{money(l.result)}</td>
-                  <td className="py-1.5 text-right"><button className="text-[10px] text-uq-purple hover:underline" onClick={() => setDrill(l.element_code)}>lineage</button></td>
+                  <td className="py-1.5 text-right num font-semibold text-uq-dark-purple">{l.display ?? money(l.result)}</td>
+                  <td className="py-1.5 text-right">{l.derived
+                    ? <span className="text-[9px] text-uq-lavender uppercase tracking-wider">derived</span>
+                    : <button className="text-[10px] text-uq-purple hover:underline" onClick={() => setDrill(l.element_code)}>lineage</button>}</td>
                 </tr>
               ))}
             </tbody>

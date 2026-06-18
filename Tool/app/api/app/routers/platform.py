@@ -21,8 +21,6 @@ PACKS = [
      "frequency": "Daily", "status": "planned", "schedules": 0},
     {"code": "NSFR", "name": "Net Stable Funding Ratio", "regulator": "SAMA/CBUAE",
      "frequency": "Monthly", "status": "planned", "schedules": 0},
-    {"code": "LE", "name": "Large Exposures Return", "regulator": "SAMA/CBUAE",
-     "frequency": "Monthly", "status": "planned", "schedules": 0},
     {"code": "ORR", "name": "Operational Risk Return", "regulator": "SAMA/CBUAE",
      "frequency": "Quarterly", "status": "planned", "schedules": 0},
     {"code": "SHARIA", "name": "Sharia Compliance Report", "regulator": "SSB/AAOIFI",

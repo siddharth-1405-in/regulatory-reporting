@@ -5,7 +5,7 @@ import { useRole } from "@/components/RoleContext";
 import { Badge, Button, Panel } from "@/components/ui";
 import { api, endpoints, type RuleRow } from "@/lib/api";
 
-const SHEETS = ["All", "Schedule 1", "Schedule 2", "Schedule 3", "Schedule 4"];
+const SHEETS = ["All", "Schedule 1", "Schedule 2", "Schedule 3", "Schedule 4", "Schedule 5"];
 const tagTone: Record<string, any> = { system: "neutral", "user-edited": "magenta" };
 
 export function RuleEngine({ id }: { id: number }) {

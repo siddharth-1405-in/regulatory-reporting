@@ -30,11 +30,17 @@ def test_catalogue_covers_all_inputs(db):
     inst = _instance(db)
     cat = dl.catalogue(db, inst.id)
     from app.registry.car_sa01 import elements as reg
-    assert len(cat) == len(reg.INPUT_ELEMENTS)
+    # every input element is present as a submittable (non-derived) row
+    inputs = [c for c in cat if not c.get("derived")]
+    assert len(inputs) == len(reg.INPUT_ELEMENTS)
     sample = next(c for c in cat if c["element_code"] == "S2_ON_CORP_BBB")
     assert sample["domain"] == "Risk"
     assert "Schedule 2" in sample["dependent_schedules"]
     assert "Summary" in sample["dependent_schedules"]
+    # Schedule 5 surfaces as read-only derived rows (no maker inputs of its own)
+    derived = [c for c in cat if c.get("derived")]
+    assert derived and all(d["sheet_name"] == "Schedule 5" for d in derived)
+    assert all(d["status"] == "derived" and not d["can_submit"] for d in derived)
 
 
 def test_element_lifecycle_submit_approve(db):

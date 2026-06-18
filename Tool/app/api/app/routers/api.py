@@ -1,6 +1,7 @@
 """HTTP API for the CAR reporting platform."""
 from __future__ import annotations
 
+import re
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
@@ -110,6 +111,27 @@ def download_template():
     )
 
 
+def _parse_amount(raw) -> Decimal | None:
+    """Parse an uploaded cell into a Decimal. Thousands commas and surrounding
+    whitespace are allowed (e.g. '1,250,000' or ' 1250000 '); letters, currency
+    symbols and other special characters are rejected. Returns None if invalid."""
+    if isinstance(raw, (int, float, Decimal)):
+        try:
+            return Decimal(str(raw))
+        except Exception:
+            return None
+    s = str(raw).strip().replace(",", "").replace(" ", "")
+    if not s:
+        return None
+    # optional leading minus, digits, optional single decimal part
+    if not re.fullmatch(r"-?\d+(\.\d+)?", s):
+        return None
+    try:
+        return Decimal(s)
+    except Exception:
+        return None
+
+
 @router.post("/instances/{iid}/ingest/upload")
 async def ingest_upload(iid: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
     """Accept an uploaded template Excel file and ingest the element values."""
@@ -125,6 +147,7 @@ async def ingest_upload(iid: int, file: UploadFile = File(...), db: Session = De
 
     values: dict[str, Decimal] = {}
     errors: list[str] = []
+    seen: set[str] = set()
     for r in rows:
         if not r or r[0] is None:
             continue
@@ -135,10 +158,16 @@ async def ingest_upload(iid: int, file: UploadFile = File(...), db: Session = De
         if code not in reg.REGISTRY:
             errors.append(f"Unknown element: {code}")
             continue
-        try:
-            values[code] = Decimal(str(raw))
-        except Exception:
-            errors.append(f"Non-numeric value for {code}: {raw}")
+        # duplicate data element rows must not silently overwrite each other
+        if code in seen:
+            errors.append(f"Duplicate data element: {code} (only the first occurrence is used)")
+            continue
+        seen.add(code)
+        parsed = _parse_amount(raw)
+        if parsed is None:
+            errors.append(f"Non-standard value for {code}: '{raw}' (numbers only; commas allowed)")
+            continue
+        values[code] = parsed
 
     if not values and errors:
         raise HTTPException(400, {"message": "No valid values found", "errors": errors})

@@ -168,7 +168,10 @@ Instance #1 (Q4 2025) carries a **Schedule 2 data error**: corporate BBB exposur
 correct `~9,500,000` (100% risk weight). This inflates Total RWA → **187,468,750**, drops CET1 to
 **7.73%**, **breaches** the buffer, and trips 3 validations incl. `CREDIT_CONCENTRATION_ANOMALY`. The
 anomaly agent surfaces it, the remediation agent proposes a fix (pending Checker), and Checker approval
-recomputes to compliant. Data starts certified; report sign-off (S1–S6→Summary) starts pending.
+recomputes to compliant. **Data starts in Draft** (ingested + quality-checked, all 142 elements "Ready
+for submission", not certified): the demo drives the full workflow — Maker submits → Checker signs off →
+domains certify → the draft auto-computes and the anomaly surfaces. Schedule (S1–S6→Summary) sign-off
+starts pending.
 
 ---
 
@@ -183,7 +186,7 @@ switcher, Excel export into the SAMA template, the full anomaly→remediation→
   login + server-enforced RBAC + per-user audit identity. *(Highest-priority gap.)*
 - **Source systems are modeled with synthetic seeded data** — no live connectors/ETL.
 - **AI agents** run deterministic fallback unless `ANTHROPIC_API_KEY` is set.
-- **PDF export** falls back to **HTML** (WeasyPrint not installed here).
+- **PDF export** produces a real multi-page PDF via **fpdf2** (HTML only as a fallback if fpdf2 is absent).
 - Frontend served via production build (`next dev` broken on OneDrive).
 
 **🔲 Not built / next (priority order):** (1) real auth + enforced RBAC; (2) ≥1 live source connector +

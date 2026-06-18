@@ -144,8 +144,58 @@ def catalogue(db: Session, instance_id: int) -> list[dict]:
             "last_approved_by": g.approved_by if g else None,
             "dependent_packs": ["CAR-SA-01"],
             "dependent_schedules": deps.get(e.element_code, [e.sheet_name]),
+            "derived": False,
         })
+    out.extend(_s5_derived_rows(db, instance_id))
     return out
+
+
+# Schedule 5 has no maker-input data elements — it is fully derived from S1–S4
+# outputs and the regulatory buffer parameters. We surface its key computed
+# outputs as read-only ("derived") rows so the schedule is visible in the grid;
+# they are never submitted/signed off here (buffer rates are edited in the Rule
+# Engine, source data in S1–S4).
+_S5_DERIVED = [
+    ("S5_BUFFER_CCB", "Capital Conservation Buffer (CCB)", "rate",
+     "Fixed conservation buffer, % of total RWA."),
+    ("S5_BUFFER_CCYB", "Countercyclical Capital Buffer (CCyB)", "rate",
+     "Countercyclical buffer in force, % of total RWA."),
+    ("S5_BUFFER_DSIB", "D-SIB Surcharge", "rate",
+     "Systemic-importance surcharge, % of total RWA."),
+    ("S5_COMBINED_BUFFER", "Combined Buffer Requirement", "rate",
+     "Sum of all applicable buffers, met with CET1 above the 4.50% minimum."),
+    ("S5_CET1_SURPLUS", "CET1 surplus / (deficit) over combined requirement", "ratio",
+     "CET1 headroom over the combined buffer — the binding distribution test."),
+]
+
+
+def _s5_derived_rows(db: Session, instance_id: int) -> list[dict]:
+    run = (db.query(CalcRun).filter(CalcRun.instance_id == instance_id)
+           .order_by(CalcRun.id.desc()).first())
+    values = run.results.get("values", {}) if run else {}
+    rows = []
+    for code, label, kind, meaning in _S5_DERIVED:
+        raw = values.get(code)
+        try:
+            val = float(raw)
+        except (TypeError, ValueError):
+            val = None
+        display = ("—" if val is None
+                   else f"{val*100:.2f}%" if kind in ("rate", "ratio")
+                   else f"{val:,.0f}")
+        rows.append({
+            "element_code": code, "label": label, "sheet_name": "Schedule 5",
+            "section": "Capital Buffers", "domain": "Finance/Risk",
+            "business_meaning": meaning,
+            "source_system": "Derived (calc engine)", "source_code": "DERIVED",
+            "source_field": "—", "source_type": "derived",
+            "raw_value": val or 0.0, "value": val or 0.0, "display": display,
+            "status": "derived", "can_submit": False,
+            "last_updated_by": "system", "last_approved_by": None,
+            "dependent_packs": ["CAR-SA-01"], "dependent_schedules": ["Schedule 5", "Summary"],
+            "derived": True,
+        })
+    return rows
 
 
 def signoff_queue(db: Session, instance_id: int) -> list[dict]:
