@@ -7,7 +7,6 @@ import { NarrativeSection } from "@/components/car/sections";
 import { CarReportOverview, DraftReport, ExceptionsWorkbench } from "@/components/car/report";
 import { api, endpoints, type ReportStatus } from "@/lib/api";
 
-const TABS = [["overview", "CAR Overview"], ["narrative", "Narrative"], ["exceptions", "Exceptions"], ["draft", "Draft CAR Report"]] as const;
 const rsTone: Record<string, any> = { Draft: "neutral", Exception: "crit", Remediation: "warn", "Signed Off": "ok" };
 
 export default function CarWorkspace() {
@@ -15,7 +14,20 @@ export default function CarWorkspace() {
   const [tab, setTab] = useState("overview");
   const { data: inst } = useQuery({ queryKey: ["instance", id], queryFn: () => api.get<any>(endpoints.instance(id)) });
   const { data: status } = useQuery({ queryKey: ["reportStatus", id], queryFn: () => api.get<ReportStatus>(endpoints.reportStatus(id)), refetchInterval: 10000 });
+  const { data: excData } = useQuery({
+    queryKey: ["exceptions", id],
+    queryFn: () => api.get<{ exceptions: any[]; open: number }>(endpoints.reportExceptions(id)),
+    refetchOnMount: true,
+  });
   const i = inst?.instance;
+  const openCount = excData?.open ?? 0;
+
+  const TABS = [
+    { key: "overview", label: "CAR Overview" },
+    { key: "narrative", label: "Narrative" },
+    { key: "exceptions", label: openCount > 0 ? `Exceptions (${openCount})` : "Exceptions" },
+    { key: "draft", label: "Draft CAR Report" },
+  ] as const;
 
   return (
     <div className="p-6 max-w-[1400px] mx-auto">
@@ -28,16 +40,21 @@ export default function CarWorkspace() {
       </div>
 
       <div className="flex gap-1 mb-4 border-b border-uq-border">
-        {TABS.map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k)}
-            className={`px-3 py-2 text-[12px] font-display font-bold border-b-2 -mb-px ${tab === k ? "border-uq-magenta text-uq-dark-purple" : "border-transparent text-uq-muted hover:text-uq-purple"}`}>{l}</button>
+        {TABS.map(({ key, label }) => (
+          <button key={key} onClick={() => setTab(key)}
+            className={`px-3 py-2 text-[12px] font-display font-bold border-b-2 -mb-px transition-colors ${tab === key ? "border-uq-magenta text-uq-dark-purple" : "border-transparent text-uq-muted hover:text-uq-purple"}`}>
+            {label}
+            {key === "exceptions" && openCount > 0 && tab !== "exceptions" && (
+              <span className="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-crit text-white text-[8px] font-bold">{openCount}</span>
+            )}
+          </button>
         ))}
       </div>
 
       {tab === "overview" && <CarReportOverview id={id} />}
       {tab === "narrative" && <NarrativeSection id={id} />}
       {tab === "exceptions" && <ExceptionsWorkbench id={id} />}
-      {tab === "draft" && <DraftReport id={id} />}
+      {tab === "draft" && <DraftReport id={id} onNavigate={(t) => setTab(t)} />}
     </div>
   );
 }

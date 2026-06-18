@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile
 from sqlalchemy.orm import Session
 
 from ..core.db import get_db
@@ -55,6 +55,102 @@ def ownership(db: Session = Depends(get_db)):
                          "ai_action": a.ai_action} for a in rows],
         "required_domains": sorted(ownership_service.required_domains()),
     }
+
+
+# ---- data-foundation template -----------------------------------------------
+@router.get("/data-foundation/template")
+def download_template():
+    """Generate and return a CAR-SA-01 data intake template Excel file."""
+    import io
+    from openpyxl import Workbook
+    wb = Workbook()
+
+    # Sheet 1: Data Template
+    ws = wb.active
+    ws.title = "Data Template"
+    headers = ["Data Element ID", "Data Element Name", "Value", "Notes"]
+    ws.append(headers)
+    for col, _ in enumerate(headers, 1):
+        ws.column_dimensions[ws.cell(1, col).column_letter].width = 30
+
+    for e in reg.ALL_ELEMENTS:
+        if e.is_input:
+            ws.append([e.element_code, e.label, "", ""])
+
+    # Sheet 2: Instructions
+    inst_ws = wb.create_sheet("Instructions")
+    inst_ws.column_dimensions["A"].width = 80
+    instructions = [
+        ["CAR-SA-01 Data Intake Template — Fill Guide"],
+        [""],
+        ["HOW TO COMPLETE THIS TEMPLATE"],
+        ["1. Use the 'Data Template' sheet to enter values."],
+        ["2. Do not change column headers or the Data Element ID column."],
+        ["3. Enter numeric values in the 'Value' column (SAR '000 unless noted)."],
+        ["4. Use the 'Notes' column for any clarifications or source references."],
+        ["5. Save as .xlsx and upload using the 'Upload completed template' button."],
+        [""],
+        ["COLUMN GUIDE"],
+        ["Data Element ID  : System identifier — do not edit."],
+        ["Data Element Name: Business label for reference only."],
+        ["Value            : Your reported figure (SAR '000)."],
+        ["Notes            : Optional — source system, date, or comments."],
+        [""],
+        ["Supported file formats: .xlsx"],
+    ]
+    for row in instructions:
+        inst_ws.append(row)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return Response(
+        content=buf.getvalue(),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=CAR_SA01_DataTemplate.xlsx"},
+    )
+
+
+@router.post("/instances/{iid}/ingest/upload")
+async def ingest_upload(iid: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """Accept an uploaded template Excel file and ingest the element values."""
+    import io
+    from openpyxl import load_workbook
+    content = await file.read()
+    try:
+        wb = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
+        ws = wb.active
+        rows = list(ws.iter_rows(min_row=2, values_only=True))
+    except Exception as exc:
+        raise HTTPException(400, f"Cannot parse file: {exc}")
+
+    values: dict[str, Decimal] = {}
+    errors: list[str] = []
+    for r in rows:
+        if not r or r[0] is None:
+            continue
+        code = str(r[0]).strip()
+        raw = r[2]
+        if raw is None or str(raw).strip() == "":
+            continue
+        if code not in reg.REGISTRY:
+            errors.append(f"Unknown element: {code}")
+            continue
+        try:
+            values[code] = Decimal(str(raw))
+        except Exception:
+            errors.append(f"Non-numeric value for {code}: {raw}")
+
+    if not values and errors:
+        raise HTTPException(400, {"message": "No valid values found", "errors": errors})
+
+    batch = ingestion_service.ingest_values(
+        db, instance_id=iid, domain="Upload",
+        source_label=file.filename or "template_upload",
+        values=values, actor="maker",
+    )
+    report_instance_service.set_status(db, iid, "INGESTED", actor="maker")
+    db.commit()
+    return {"batch_id": batch.id, "ingested": len(values), "skipped": len(errors), "errors": errors}
 
 
 # ---- instances --------------------------------------------------------------

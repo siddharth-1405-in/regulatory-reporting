@@ -1,7 +1,7 @@
 "use client";
 import clsx from "clsx";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Sparkles } from "lucide-react";
 
 export function Panel({ title, eyebrow, actions, children, className }: {
   title?: string; eyebrow?: string; actions?: React.ReactNode;
@@ -82,6 +82,14 @@ export function NavTile({ href, icon, title, desc }: {
         <span className="block text-[11px] text-uq-muted leading-snug">{desc}</span>
       </span>
     </Link>
+  );
+}
+
+export function AiBadge({ label = "AI" }: { label?: string }) {
+  return (
+    <span className="inline-flex items-center gap-1 text-[9.5px] bg-uq-purple/8 text-uq-purple border border-uq-purple/20 rounded-full px-2 py-0.5 font-display font-bold tracking-wide">
+      <Sparkles className="w-2.5 h-2.5" strokeWidth={2} /> {label}
+    </span>
   );
 }
 

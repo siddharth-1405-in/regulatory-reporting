@@ -41,8 +41,12 @@ def assemble(db: Session, instance_id: int) -> dict:
                 return p
         return None
 
+    seen_rules: set[str] = set()
     items = []
     for v in fails:
+        if v.rule_code in seen_rules:
+            continue
+        seen_rules.add(v.rule_code)
         p = proposal_for(v.elements or [])
         items.append({
             "rule_code": v.rule_code, "issue": v.message,
@@ -52,7 +56,7 @@ def assemble(db: Session, instance_id: int) -> dict:
             "ai_root_cause": root_cause, "ai_recommendation": recommendation,
             "proposal": _proposal_dict(p) if p else None,
         })
-    return {"exceptions": items, "open": sum(1 for v in fails),
+    return {"exceptions": items, "open": len(items),
             "proposals": [_proposal_dict(p) for p in proposals]}
 
 

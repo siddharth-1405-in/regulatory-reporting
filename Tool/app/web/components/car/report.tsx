@@ -1,9 +1,10 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { RefreshCw } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { useRole } from "@/components/RoleContext";
-import { Badge, Button, Panel, Stat, StatusDot } from "@/components/ui";
+import { AiBadge, Badge, Button, Panel, Stat, StatusDot } from "@/components/ui";
 import {
   api, endpoints, type Drilldown, type ExceptionItem, type ReportStatus, type ScheduleDetail,
 } from "@/lib/api";
@@ -19,6 +20,7 @@ function useStatus(id: number) {
 export function CarReportOverview({ id }: { id: number }) {
   const qc = useQueryClient();
   const { data } = useStatus(id);
+  const [refreshing, setRefreshing] = useState(false);
   const m = data?.metrics; const flags = data?.flags;
   const scheds = data?.schedules ?? [];
   const signed = scheds.filter((s) => s.status === "signed_off").length;
@@ -28,21 +30,29 @@ export function CarReportOverview({ id }: { id: number }) {
     m ? `Total RWA SAR ${money(m.total_rwa)} '000; total capital ratio ${pct(m.total_ratio)}.` : "Awaiting certified data to compute.",
     `${signed} of ${scheds.length} sections signed off.`,
   ];
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    qc.invalidateQueries({ queryKey: ["reportStatus", id] });
+    setTimeout(() => setRefreshing(false), 1200);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-3">
         <Stat label="Report Status" value={data?.report_status ?? "—"} tone={breach ? "crit" : data?.report_status === "Signed Off" ? "ok" : undefined} sub="CAR-SA-01" />
         <Stat label="Total Capital Ratio" value={m ? pct(m.total_ratio) : "—"} sub="min 10.50%" tone={m && m.total_ratio < 0.105 ? "crit" : "ok"} />
         <Stat label="Total RWA" value={m ? money(m.total_rwa) : "—"} sub="SAR '000" tone="magenta" />
-        <Stat label="Sections signed" value={`${signed}/${scheds.length}`} sub="schedule + summary" tone={signed === scheds.length && scheds.length ? "ok" : undefined} />
+        <Stat label="Sections Signed-off" value={`${signed}/${scheds.length}`} sub="schedule + summary" tone={signed === scheds.length && scheds.length ? "ok" : undefined} />
       </div>
       <div className="grid grid-cols-[1fr_320px] gap-4 items-start">
         <Panel eyebrow="Report" title="Key observations">
           <ul className="flex flex-col gap-1.5 text-[12px] text-uq-mid list-disc pl-4">{observations.map((o, i) => <li key={i}>{o}</li>)}</ul>
           <div className="flex items-center justify-between mt-3 text-[10px] text-uq-muted">
             <span>Draft auto-computes from certified data — no manual run needed.</span>
-            <button className="text-uq-purple hover:underline" onClick={() => qc.invalidateQueries({ queryKey: ["reportStatus", id] })}>
-              last computed {data?.last_computed ? relTime(data.last_computed) : "—"} · refresh
+            <button className="flex items-center gap-1 text-uq-purple hover:underline" onClick={handleRefresh} disabled={refreshing}>
+              <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} />
+              {refreshing ? "Updating…" : `last computed ${data?.last_computed ? relTime(data.last_computed) : "—"} · refresh`}
             </button>
           </div>
         </Panel>
@@ -61,10 +71,12 @@ export function CarReportOverview({ id }: { id: number }) {
 }
 
 // ============================ DRAFT CAR REPORT =============================
-export function DraftReport({ id }: { id: number }) {
+export function DraftReport({ id, onNavigate }: { id: number; onNavigate?: (tab: string) => void }) {
   const { data: status } = useStatus(id);
   const scheds = status?.schedules ?? [];
   const [key, setKey] = useState("Cover");
+  const flags = status?.flags;
+  const breach = flags?.buffer_status === "Breach";
 
   return (
     <div>
@@ -79,49 +91,65 @@ export function DraftReport({ id }: { id: number }) {
         </div>
         <div className="flex items-center gap-2">
           <Badge tone={rsTone[status?.report_status ?? "Draft"]}>{status?.report_status ?? "Draft"}</Badge>
-          <Button variant="ghost" onClick={() => window.open(`/api/instances/${id}/export/pdf`, "_blank")}>Preview draft report</Button>
           <Button variant="soft" onClick={() => window.open(`/api/instances/${id}/export/excel`, "_blank")}>Export Excel</Button>
           <Button variant="soft" onClick={() => window.open(`/api/instances/${id}/export/pdf`, "_blank")}>Export PDF</Button>
         </div>
       </div>
-      <ScheduleView id={id} schedKey={key} view={scheds.find((s) => s.key === key)} />
+      <ScheduleView id={id} schedKey={key} view={scheds.find((s) => s.key === key)}
+        onBreachClick={breach && onNavigate ? () => onNavigate("exceptions") : undefined} />
     </div>
   );
 }
 
-function ScheduleView({ id, schedKey, view }: { id: number; schedKey: string; view?: any }) {
+function ScheduleView({ id, schedKey, view, onBreachClick }: { id: number; schedKey: string; view?: any; onBreachClick?: () => void }) {
   const qc = useQueryClient();
   const { role, actor } = useRole();
+  const isMaker = role === "Maker" || role === "Admin";
   const isChecker = role === "Checker" || role === "Admin";
-  const isLineSchedule = ["S1", "S2", "S3", "S4", "S6"].includes(schedKey);
+  const isLineSchedule = ["S1", "S2", "S3", "S4", "S5", "S6"].includes(schedKey);
   const { data } = useQuery<ScheduleDetail>({ queryKey: ["schedule", id, schedKey], enabled: isLineSchedule, queryFn: () => api.get(endpoints.reportSchedule(id, schedKey)) });
-  const [comment, setComment] = useState("");
+  const [submittedLocal, setSubmittedLocal] = useState<Set<string>>(new Set());
   const [drill, setDrill] = useState<string | null>(null);
 
   const signoff = useMutation({
-    mutationFn: () => api.post(endpoints.reportSignoff(id, schedKey), { role, actor, comment }),
-    onSuccess: () => { setComment(""); qc.invalidateQueries({ queryKey: ["reportStatus", id] }); qc.invalidateQueries({ queryKey: ["overview"] }); },
+    mutationFn: () => api.post(endpoints.reportSignoff(id, schedKey), { role, actor, comment: "" }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["reportStatus", id] }); qc.invalidateQueries({ queryKey: ["overview"] }); },
     onError: (e: any) => alert(e?.detail ?? "Sign-off blocked"),
   });
   const { data: dd } = useQuery<Drilldown>({ queryKey: ["drilldown", id, drill], enabled: !!drill, queryFn: () => api.get(endpoints.dfDrilldown(id, drill!)) });
 
+  const makerSubmitted = submittedLocal.has(schedKey);
+
   const signoffBar = view && (
     <div className="flex items-center gap-2">
       <Badge tone={view.status === "signed_off" ? "ok" : view.status === "reopened" ? "warn" : "neutral"}>{view.status}</Badge>
-      {isChecker && view.can_signoff && <>
-        <input placeholder="Sign-off comment…" value={comment} onChange={(e) => setComment(e.target.value)} className="rounded-row border border-uq-border px-2 py-1 text-[11px] w-44" />
-        <Button onClick={() => signoff.mutate()} disabled={signoff.isPending}>Sign off {schedKey}</Button>
-      </>}
+      {isMaker && view.status !== "signed_off" && !makerSubmitted && (
+        <Button variant="soft" onClick={() => setSubmittedLocal((s) => new Set([...s, schedKey]))}>
+          Submit for Sign-off
+        </Button>
+      )}
+      {isMaker && makerSubmitted && view.status !== "signed_off" && (
+        <Badge tone="warn">Submitted — awaiting Checker</Badge>
+      )}
+      {isChecker && view.can_signoff && (
+        <Button onClick={() => signoff.mutate()} disabled={signoff.isPending}>
+          {signoff.isPending ? "Signing off…" : `Sign-off ${schedKey}`}
+        </Button>
+      )}
       {!view.can_signoff && view.status !== "signed_off" && <span className="text-[10px] text-warn2">{view.blocked_reason}</span>}
     </div>
   );
 
-  if (schedKey === "Cover") return <CoverPanel id={id} actions={signoffBar} />;
+  if (schedKey === "Cover") return <CoverPanel id={id} actions={signoffBar} onBreachClick={onBreachClick} />;
   if (schedKey === "Summary") return <SummaryPanel data={data} id={id} actions={signoffBar} />;
 
   return (
     <Panel eyebrow="Draft CAR Report" title={view?.label ?? schedKey} actions={signoffBar}>
-      {!data?.available && <div className="py-8 text-center text-[11px] text-uq-muted">Certify the underlying data to populate this schedule.</div>}
+      {!data?.available && (
+        <div className="py-8 text-center text-[11px] text-uq-muted">
+          Pending certification — values will populate once data is signed off in the Data Foundation.
+        </div>
+      )}
       {data?.available && (
         <div className="overflow-auto max-h-[520px]">
           <table className="w-full text-[11px]">
@@ -133,7 +161,9 @@ function ScheduleView({ id, schedKey, view }: { id: number; schedKey: string; vi
                 <tr key={l.element_code} className="border-b border-uq-border/50 hover:bg-uq-alt-light align-top">
                   <td className="py-1.5 text-uq-ink">{l.label}<div className="font-mono text-[9px] text-uq-lavender">{l.element_code}</div></td>
                   <td className="py-1.5 text-uq-muted text-[10px] max-w-[220px]">{l.business_meaning}</td>
-                  <td className="py-1.5 text-uq-muted text-[10px] max-w-[260px]">{l.computation}</td>
+                  <td className="py-1.5 text-uq-muted text-[10px] max-w-[260px] italic">
+                    {l.computation || "This line is directly sourced and requires no separate computation."}
+                  </td>
                   <td className="py-1.5 text-right num font-semibold text-uq-dark-purple">{money(l.result)}</td>
                   <td className="py-1.5 text-right"><button className="text-[10px] text-uq-purple hover:underline" onClick={() => setDrill(l.element_code)}>lineage</button></td>
                 </tr>
@@ -155,15 +185,25 @@ function ScheduleView({ id, schedKey, view }: { id: number; schedKey: string; vi
   );
 }
 
-function CoverPanel({ id, actions }: { id: number; actions: any }) {
+function CoverPanel({ id, actions, onBreachClick }: { id: number; actions: any; onBreachClick?: () => void }) {
   const { data } = useQuery({ queryKey: ["instance", id], queryFn: () => api.get<any>(endpoints.instance(id)) });
   const inst = data?.instance;
+  const breach = data?.flags?.buffer_status === "Breach";
   return (
     <Panel eyebrow="CAR-SA-01" title="Cover" actions={actions}>
       <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-[12px] max-w-2xl">
-        {[["Bank full legal name", inst?.bank_name], ["Reporting quarter", inst?.period_label], ["Reporting period end", inst?.period_end], ["Reporting currency", inst?.currency], ["Units", inst?.units], ["Report status", data?.flags?.buffer_status]].map(([k, v]) => (
+        {[["Bank full legal name", inst?.bank_name], ["Reporting quarter", inst?.period_label], ["Reporting period end", inst?.period_end], ["Reporting currency", inst?.currency], ["Units", inst?.units]].map(([k, v]) => (
           <div key={k as string} className="flex justify-between py-1.5 border-b border-uq-border/50"><span className="text-uq-muted">{k}</span><span className="font-semibold text-uq-ink">{v ?? "—"}</span></div>
         ))}
+        <div className="flex justify-between py-1.5 border-b border-uq-border/50">
+          <span className="text-uq-muted">Report status</span>
+          <span className={`font-semibold ${breach ? "text-crit" : "text-ok"}`}>
+            {data?.flags?.buffer_status ?? "—"}
+            {breach && onBreachClick && (
+              <button className="ml-2 text-[10px] text-uq-purple underline" onClick={onBreachClick}>→ View Exceptions</button>
+            )}
+          </span>
+        </div>
       </div>
       <div className="mt-4 rounded-row bg-uq-alt-light p-3 border-l-[3px] border-uq-magenta text-[11px] text-uq-mid max-w-3xl">
         <div className="eyebrow mb-1">Declaration</div>
@@ -200,39 +240,52 @@ function SummaryPanel({ data, id, actions }: { data?: ScheduleDetail; id: number
 // ============================ EXCEPTIONS ===================================
 export function ExceptionsWorkbench({ id }: { id: number }) {
   const qc = useQueryClient();
-  const { role, actor } = useRole();
-  const isMaker = role === "Maker" || role === "Admin";
-  const isChecker = role === "Checker" || role === "Admin";
-  const { data } = useQuery({ queryKey: ["exceptions", id], queryFn: () => api.get<{ exceptions: ExceptionItem[]; open: number }>(endpoints.reportExceptions(id)) });
-  const [rationale, setRationale] = useState<Record<number, string>>({});
-  const refresh = () => { qc.invalidateQueries({ queryKey: ["exceptions", id] }); qc.invalidateQueries({ queryKey: ["reportStatus", id] }); qc.invalidateQueries({ queryKey: ["overview"] }); };
-
-  const makerAct = useMutation({
-    mutationFn: ({ pid, r }: { pid: number; r: string }) => api.post(endpoints.exceptionMakerAction(id), { proposal_id: pid, rationale: r, role, actor }),
-    onSuccess: refresh, onError: (e: any) => alert(e?.detail ?? "Not permitted"),
-  });
-  const checkerDecide = useMutation({
-    mutationFn: ({ pid, decision, comment }: { pid: number; decision: string; comment: string }) => api.post(endpoints.exceptionCheckerDecision(id), { proposal_id: pid, decision, comment, role, actor }),
-    onSuccess: refresh, onError: (e: any) => alert(e?.detail ?? "Not permitted"),
+  const { data, refetch } = useQuery({
+    queryKey: ["exceptions", id],
+    queryFn: () => api.get<{ exceptions: ExceptionItem[]; open: number }>(endpoints.reportExceptions(id)),
+    refetchOnMount: true,
+    refetchOnWindowFocus: false,
   });
 
-  const items = data?.exceptions ?? [];
+  // auto-refresh when this component mounts (tab activation)
+  useEffect(() => { refetch(); }, []);
+
+  const refresh = () => { qc.invalidateQueries({ queryKey: ["exceptions", id] }); qc.invalidateQueries({ queryKey: ["reportStatus", id] }); };
+
+  // filter out approved remediation items (already resolved)
+  const items = (data?.exceptions ?? []).filter((x) => x.proposal?.status !== "approved");
+
   return (
-    <Panel eyebrow="Validation & AI" title="Exception workbench" actions={<Badge tone={items.length ? "crit" : "ok"}>{items.length} open</Badge>}>
+    <Panel eyebrow="Validation & AI" title="Exception workbench"
+      actions={
+        <div className="flex items-center gap-2">
+          <AiBadge label="AI Analysis" />
+          <Badge tone={items.length ? "crit" : "ok"}>{items.length} open</Badge>
+          <Button variant="ghost" onClick={refresh} className="flex items-center gap-1">
+            <RefreshCw className="w-3 h-3" /> Refresh
+          </Button>
+        </div>
+      }>
       {items.length === 0 && <div className="py-10 text-center text-[11px] text-uq-muted">No open exceptions — the draft is clean.</div>}
       <div className="flex flex-col gap-3">
         {items.map((x, i) => (
-          <div key={i} className="rounded-row border border-uq-border p-3">
+          <div key={`${x.rule_code}-${i}`} className="rounded-row border border-uq-border p-3">
             <div className="flex items-center justify-between mb-1">
               <span className="font-display font-bold text-[12px] text-uq-dark-purple">{x.rule_code}</span>
               <Badge tone="magenta">{x.impacted_schedule}</Badge>
             </div>
             <div className="text-[11px] text-uq-ink mb-2">{x.issue}</div>
             <div className="grid grid-cols-2 gap-2 mb-2">
-              <div className="rounded-row bg-uq-alt-light p-2"><div className="eyebrow mb-0.5">AI root cause</div><div className="text-[10.5px] text-uq-mid">{x.ai_root_cause || "—"}</div></div>
-              <div className="rounded-row bg-uq-alt-light p-2"><div className="eyebrow mb-0.5">AI recommendation</div><div className="text-[10.5px] text-uq-mid">{x.ai_recommendation || "—"}</div></div>
+              <div className="rounded-row bg-uq-alt-light p-2">
+                <div className="flex items-center gap-1 mb-0.5"><span className="eyebrow">AI Root Cause</span><AiBadge /></div>
+                <div className="text-[10.5px] text-uq-mid">{x.ai_root_cause || "No AI analysis available — run agents to generate."}</div>
+              </div>
+              <div className="rounded-row bg-uq-alt-light p-2">
+                <div className="flex items-center gap-1 mb-0.5"><span className="eyebrow">AI Recommendation</span><AiBadge /></div>
+                <div className="text-[10.5px] text-uq-mid">{x.ai_recommendation || "Run agents to generate AI recommendations."}</div>
+              </div>
             </div>
-            {x.proposal ? (
+            {x.proposal && (
               <div className="rounded-row border border-uq-border p-2.5">
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-mono text-[10px] text-uq-purple">{x.proposal.element_code}: {money(x.proposal.current_value)} → {money(x.proposal.proposed_value)}</span>
@@ -240,21 +293,11 @@ export function ExceptionsWorkbench({ id }: { id: number }) {
                 </div>
                 {x.proposal.maker_rationale && <div className="text-[10px] text-uq-mid">Maker: {x.proposal.maker_rationale}</div>}
                 {x.proposal.checker_comment && <div className="text-[10px] text-uq-muted">Checker: {x.proposal.checker_comment}</div>}
-                {x.proposal.status === "proposed" && (
-                  <div className="mt-2 flex flex-col gap-2">
-                    {isMaker && <div className="flex items-center gap-2">
-                      <Button variant="soft" onClick={() => makerAct.mutate({ pid: x.proposal!.id, r: "Accepted AI recommendation" })}>Accept AI rec</Button>
-                      <input placeholder="…or enter an alternate rationale" value={rationale[x.proposal.id] ?? ""} onChange={(e) => setRationale({ ...rationale, [x.proposal!.id]: e.target.value })} className="flex-1 rounded-row border border-uq-border px-2 py-1 text-[11px]" />
-                      <Button variant="ghost" disabled={!rationale[x.proposal.id]} onClick={() => makerAct.mutate({ pid: x.proposal!.id, r: rationale[x.proposal!.id] })}>Submit rationale</Button>
-                    </div>}
-                    {isChecker && <div className="flex items-center gap-2">
-                      <Button onClick={() => checkerDecide.mutate({ pid: x.proposal!.id, decision: "approve", comment: "Approved" })}>Approve & apply</Button>
-                      <Button variant="ghost" onClick={() => checkerDecide.mutate({ pid: x.proposal!.id, decision: "reject", comment: "Rejected — source confirmation required" })}>Reject</Button>
-                    </div>}
-                  </div>
-                )}
               </div>
-            ) : <div className="text-[10px] text-uq-muted">{x.remediation_hint}</div>}
+            )}
+            <div className="mt-2 text-[9.5px] text-uq-muted border-t border-uq-border/40 pt-2">
+              Resolution: Correct the underlying data via the Data Foundation workflow, then re-run validation.
+            </div>
           </div>
         ))}
       </div>

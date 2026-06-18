@@ -8,7 +8,6 @@ import { api, endpoints, type Instance, type PlatformOverview } from "@/lib/api"
 
 type CycleStatus = { label: string; tone: any; desc: string };
 
-// One unified, business-legible status per reporting cycle.
 function cycleStatus(i: PlatformOverview["instances"][number]): CycleStatus {
   if (i.report_status === "Signed Off")
     return { label: "Signed Off", tone: "ok", desc: "Approved for this cycle" };
@@ -45,11 +44,12 @@ export default function Overview() {
 
   return (
     <div className="h-[calc(100vh-52px)] overflow-hidden flex flex-col p-6 gap-3.5 max-w-[1400px] mx-auto w-full">
+
       {/* header */}
       <div className="flex items-end justify-between shrink-0">
         <div>
           <h1 className="font-display font-extrabold text-uq-dark-purple text-[22px] tracking-tight">Regulatory Reporting</h1>
-          <p className="text-[12.5px] text-uq-muted">A unified view of reporting progress, review readiness and sign-off across your regulatory packs.</p>
+          <p className="text-[12.5px] text-uq-muted">Command center for governed regulatory reporting — from data certification to final sign-off.</p>
         </div>
         <Button onClick={() => setOpen((v) => !v)}>+ New reporting cycle</Button>
       </div>
@@ -77,6 +77,23 @@ export default function Overview() {
         <Stat label="Requiring Attention" value={data ? count("Needs Attention") : "—"} sub="exceptions to resolve" tone={count("Needs Attention") ? "crit" : "ok"} />
       </div>
 
+      {/* Regulatory Report Portfolio — centred, full-width, prominent */}
+      <Panel eyebrow="Reporting portfolio" title="Regulatory Report Portfolio" className="shrink-0">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2.5">
+          {data?.packs.map((p) => (
+            <div key={p.code} className="rounded-row border border-uq-border p-2.5 flex items-center justify-between gap-2">
+              <div>
+                <div className="font-display font-bold text-[12px] text-uq-dark-purple leading-tight">{p.name}</div>
+                <div className="text-[10px] text-uq-muted mt-0.5">{p.regulator} · {p.frequency} · <span className="font-mono">{p.code}</span></div>
+              </div>
+              {p.status === "active"
+                ? <Badge tone="ok"><StatusDot tone="ok" /> Active</Badge>
+                : <Badge tone="neutral">Planned</Badge>}
+            </div>
+          ))}
+        </div>
+      </Panel>
+
       {/* primary pathways */}
       <div className="grid grid-cols-2 gap-3 shrink-0">
         <NavTile href="/data-foundation" icon={<Database className="w-5 h-5" strokeWidth={2} />}
@@ -85,57 +102,39 @@ export default function Overview() {
           title="Report Pack" desc="Review-ready packs — narratives, exceptions and report outputs" />
       </div>
 
-      {/* cycles + portfolio */}
-      <div className="grid grid-cols-[1fr_340px] gap-3.5 flex-1 min-h-0">
-        <Panel eyebrow="Reporting cycle status" title="Active reporting cycles" className="flex flex-col min-h-0">
-          <div className="overflow-auto min-h-0">
-            <table className="w-full text-[12px]">
-              <thead className="sticky top-0 bg-white"><tr className="text-left text-uq-purple">
-                {["Report", "Period", "Entity", "Status", ""].map((h) => (
-                  <th key={h} className="font-display font-extrabold uppercase text-[9px] tracking-wider pb-2 border-b border-uq-border">{h}</th>))}
-              </tr></thead>
-              <tbody>
-                {instances.map((i, idx) => {
-                  const s = statuses[idx];
-                  return (
-                    <tr key={i.id} className="border-b border-uq-border/60 hover:bg-uq-alt-light cursor-pointer"
-                      onClick={() => router.push(`/report-pack/car/${i.id}`)}>
-                      <td className="py-2.5">
-                        <div className="font-semibold text-uq-ink">Capital Adequacy Return</div>
-                        <div className="font-mono text-[9px] text-uq-lavender">{i.pack}</div>
-                      </td>
-                      <td className="font-semibold text-uq-ink">{i.period_label}</td>
-                      <td className="text-uq-muted text-[11px]">{i.bank_name}</td>
-                      <td>
-                        <Badge tone={s.tone}>{s.label}</Badge>
-                        <div className="text-[10px] text-uq-muted mt-0.5">{s.desc}</div>
-                      </td>
-                      <td className="text-right"><Button variant="ghost">Open ›</Button></td>
-                    </tr>
-                  );
-                })}
-                {data && instances.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-uq-muted">No reporting cycles yet.</td></tr>}
-              </tbody>
-            </table>
-          </div>
-        </Panel>
-
-        <Panel eyebrow="Reporting portfolio" title="Regulatory packs" className="flex flex-col min-h-0">
-          <div className="flex flex-col gap-2 overflow-auto min-h-0">
-            {data?.packs.map((p) => (
-              <div key={p.code} className="rounded-row border border-uq-border p-2.5 flex items-center justify-between">
-                <div>
-                  <div className="font-display font-bold text-[12px] text-uq-dark-purple">{p.name}</div>
-                  <div className="text-[10px] text-uq-muted">{p.regulator} · {p.frequency} · {p.code}</div>
-                </div>
-                {p.status === "active"
-                  ? <Badge tone="ok"><StatusDot tone="ok" /> Active</Badge>
-                  : <Badge tone="neutral">Planned</Badge>}
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </div>
+      {/* active reporting cycles */}
+      <Panel eyebrow="Reporting cycle status" title="Active reporting cycles" className="flex flex-col flex-1 min-h-0">
+        <div className="overflow-auto min-h-0">
+          <table className="w-full text-[12px]">
+            <thead className="sticky top-0 bg-white"><tr className="text-left text-uq-purple">
+              {["Report", "Period", "Entity", "Status", ""].map((h) => (
+                <th key={h} className="font-display font-extrabold uppercase text-[9px] tracking-wider pb-2 border-b border-uq-border">{h}</th>))}
+            </tr></thead>
+            <tbody>
+              {instances.map((i, idx) => {
+                const s = statuses[idx];
+                return (
+                  <tr key={i.id} className="border-b border-uq-border/60 hover:bg-uq-alt-light cursor-pointer"
+                    onClick={() => router.push(`/report-pack/car/${i.id}`)}>
+                    <td className="py-2.5">
+                      <div className="font-semibold text-uq-ink">Capital Adequacy Return</div>
+                      <div className="font-mono text-[9px] text-uq-lavender">{i.pack}</div>
+                    </td>
+                    <td className="font-semibold text-uq-ink">{i.period_label}</td>
+                    <td className="text-uq-muted text-[11px]">{i.bank_name}</td>
+                    <td>
+                      <Badge tone={s.tone}>{s.label}</Badge>
+                      <div className="text-[10px] text-uq-muted mt-0.5">{s.desc}</div>
+                    </td>
+                    <td className="text-right"><Button variant="ghost">Open ›</Button></td>
+                  </tr>
+                );
+              })}
+              {data && instances.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-uq-muted">No reporting cycles yet.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </Panel>
     </div>
   );
 }

@@ -9,7 +9,6 @@ import { DataIngestion } from "./_components/ingestion";
 import { DataValidation } from "./_components/validation";
 import { ReportReadyElements } from "./_components/elements";
 import { RuleEngine } from "./_components/rules";
-import { SubmissionSignoff } from "./_components/signoff";
 import { WorkflowNav, type Stage } from "./_components/WorkflowNav";
 
 export default function DataFoundation() {
@@ -22,13 +21,21 @@ export default function DataFoundation() {
   const activeId = iid ?? instances[0]?.id ?? null;
   const active = instances.find((i) => i.id === activeId);
 
+  const stageLabels: Record<Stage, string> = {
+    ingestion: "Step 1 of 4 — Data Ingestion",
+    validation: "Step 2 of 4 — Data Validation",
+    rules: "Step 3 of 4 — Rule Engine",
+    elements: "Step 4 of 4 — Report-Ready Data & Sign-off",
+  };
+
   return (
     <div className="p-6 max-w-[1500px] mx-auto flex flex-col gap-3.5">
       {/* A. context header */}
       <div className="flex items-end justify-between">
         <div>
+          <div className="eyebrow mb-0.5">{stageLabels[stage]}</div>
           <h1 className="font-display font-extrabold text-uq-dark-purple text-[22px] tracking-tight">Data Foundation</h1>
-          <p className="text-[12.5px] text-uq-muted max-w-[680px]">Prepare, validate and sign off the data that feeds a selected regulatory report. Only report-ready data elements are submitted and certified — this foundation feeds the Report Pack.</p>
+          <p className="text-[12.5px] text-uq-muted max-w-[680px]">Prepare, validate and sign off the data that feeds a selected regulatory report. Only certified data elements are published to the Report Pack.</p>
         </div>
         <Button variant="ghost" className="flex items-center gap-1.5" disabled={!activeId}
           onClick={() => activeId && router.push(`/report-pack/car/${activeId}`)}>
@@ -69,11 +76,10 @@ export default function DataFoundation() {
       {!activeId
         ? <Panel title="No reporting cycle"><div className="py-8 text-center text-[11px] text-uq-muted">Open a reporting cycle from the Overview first.</div></Panel>
         : <div>
-          {stage === "ingestion" && <DataIngestion />}
-          {stage === "validation" && <DataValidation id={activeId} />}
+          {stage === "ingestion" && <DataIngestion id={activeId} />}
+          {stage === "validation" && <DataValidation id={activeId} onProceed={() => setStage("rules")} />}
           {stage === "rules" && <RuleEngine id={activeId} />}
           {stage === "elements" && <ReportReadyElements id={activeId} />}
-          {stage === "signoff" && <SubmissionSignoff id={activeId} />}
         </div>}
     </div>
   );

@@ -59,6 +59,8 @@ export const endpoints = {
   dqRun: (id: number) => `/instances/${id}/dq/run`,
   audit: (id: number) => `/instances/${id}/audit`,
   inputs: (id: number) => `/instances/${id}/inputs`,
+  dataTemplate: "/data-foundation/template",
+  ingestUpload: (id: number) => `/instances/${id}/ingest/upload`,
 };
 
 // ---- shared types -----------------------------------------------------------

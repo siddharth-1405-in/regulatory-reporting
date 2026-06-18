@@ -2,14 +2,13 @@
 import clsx from "clsx";
 import { Check } from "lucide-react";
 
-export type Stage = "ingestion" | "validation" | "rules" | "elements" | "signoff";
+export type Stage = "ingestion" | "validation" | "rules" | "elements";
 
 export const STAGES: { key: Stage; label: string; hint: string }[] = [
   { key: "ingestion", label: "Data Ingestion", hint: "Connect sources or upload" },
-  { key: "validation", label: "Data Validation", hint: "Completeness & integrity" },
+  { key: "validation", label: "Data Validation", hint: "Quality checks & integrity" },
   { key: "rules", label: "Rule Engine", hint: "Transformation logic" },
-  { key: "elements", label: "Report-Ready Data Elements", hint: "Review & submit" },
-  { key: "signoff", label: "Submission & Sign-off", hint: "Maker · Checker" },
+  { key: "elements", label: "Report-Ready Data & Sign-off", hint: "Review, submit & certify" },
 ];
 
 export function WorkflowNav({ active, onSelect, done }: {

@@ -61,7 +61,7 @@ def schedule(iid: int, key: str, db: Session = Depends(get_db)):
     if not run:
         return {"key": key, "lines": [], "available": False}
     name_map = {"S1": "Schedule 1", "S2": "Schedule 2", "S3": "Schedule 3",
-                "S4": "Schedule 4", "S6": "Schedule 6"}
+                "S4": "Schedule 4", "S5": "Schedule 5", "S6": "Schedule 6"}
     sched_name = name_map.get(key)
     lines = []
     if sched_name and sched_name in run.results["schedules"]:
